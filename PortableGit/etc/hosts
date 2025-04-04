@@ -1,0 +1,20 @@
+﻿# Added by Docker Desktop
+10.168.1.107 host.docker.internal
+10.168.1.107 gateway.docker.internal
+# To allow the same kube context to work on the host and the container:
+127.0.0.1 kubernetes.docker.internal
+# End of section
+127.0.0.1  88cdn.com 
+127.0.0.1  vip.xunlei.com 
+127.0.0.1  soa-vip-ssl.xunlei.com 
+127.0.0.1  conf-m-ssl.xunlei.com 
+127.0.0.1  advertpay-vip-ssl.xunlei.com 
+127.0.0.1  thunderx.rcv.sandai.net 
+127.0.0.1  api-shoulei-ssl.xunlei.com 
+127.0.0.1  act-youxi.xunlei.com 
+127.0.0.1  etl-xlmc-ssl.xunlei.com 
+127.0.0.1  sentry-youxi.xunlei.com 
+127.0.0.1  youxi.xunlei.com 
+127.0.0.1  static.xbase.cloud 
+127.0.0.1  analysis-acc-ssl.xunlei.com 
+127.0.0.1  login.xunlei.com 

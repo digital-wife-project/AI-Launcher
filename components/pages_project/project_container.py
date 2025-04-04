@@ -14,13 +14,13 @@ from .model_windows import ModalDownloadDialog
 from ..openi_download import OpeniDownloadWorker
 from ..launcher import BatRunner
 from .DemoLabel import DemoLabel
-from ..pip_installer import CommandExecutorThread
+from ..pip_installer import GitCloneAndRunThread
 from .side_message import send_simple_message
 from ..json_changer import json_adder,loacl_project_json_reader
 
 class Row_for_each_project(SiDenseHContainer):
 
-    on_download_click = pyqtSignal(str,str)
+    on_download_click = pyqtSignal(object,str)
 
     def __init__(self,parent,project_name,insatller,project_detail,install_args):
         super().__init__(parent)
@@ -72,29 +72,23 @@ class Row_for_each_project(SiDenseHContainer):
             self.demo_progress_button_text.clicked.connect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args)))
             self.demo_progress_button_text.adjustSize()
 
-    def execute_commands(self,commands, working_directory):
-        # 定义要执行的命令和路径
-        # 创建并启动线程
-        self.thread = CommandExecutorThread(commands, working_directory)
-        self.thread.output_signal.connect(self.convert_Singnal2Info)
-        self.thread.start()
-
-    def convert_Singnal2Info(self,signal_output):
-        # 将信号转换为字符串信息
-        send_simple_message(0,signal_output,True)
-
     def downloader(self,projectname,install_arg,user_path):
         self.demo_progress_button_text.setEnabled(False)
         self.demo_progress_button_text.setText("正在下载")
         if self.insatller=="openi":
+            print("使用openi下载")
             self.download_worker = OpeniDownloadWorker(projectname,"wyyyz/dig",install_arg,user_path)
             self.download_worker.presentage_updated.connect(self.presentage_updated)
             self.download_worker.on_download_finished.connect(self.download_finished)
-            self.download_worker.finished_unzipping.connect(self.unzipFinished)
+            self.download_worker.finished_unzipping.connect(self.OpeniunzipFinished)
             self.download_worker.start()
         if self.insatller=="pip":
-            self.execute_commands(install_arg,user_path)
-
+            print("使用pip下载")
+            self.download_worker = OpeniDownloadWorker(projectname,"wyyyz/dig",install_arg,user_path)
+            self.download_worker.presentage_updated.connect(self.presentage_updated)
+            self.download_worker.on_download_finished.connect(self.download_finished)
+            self.download_worker.finished_unzipping.connect(self.PythonEnvUnzipFinished)
+            self.download_worker.start()
 
     def presentage_updated(self, percentage):
         self.demo_progress_button_text.setProgress(percentage/100)
@@ -103,13 +97,43 @@ class Row_for_each_project(SiDenseHContainer):
     def download_finished(self):
         self.demo_progress_button_text.setText("正在解压")
 
-    def unzipFinished(self,project_name,save_path):
+    def OpeniunzipFinished(self,project_name,save_path,_):
         self.demo_progress_button_text.setText("解压完成")
         abs_path = os.path.abspath(save_path)
         print(f"Download finished for file: {abs_path}")
         json_adder(project_name,abs_path)
         self.Refresh()
         self.demo_progress_button_text.setEnabled(True)
+
+    def convert_Singnal2Info(self,signal_output):
+        # 将信号转换为字符串信息
+        send_simple_message(0,signal_output,True)
+
+
+    def PythonEnvUnzipFinished(self,project_name,save_path,install_arg):
+        self.demo_progress_button_text.setText("Python解压完成")
+        abs_path = os.path.abspath(save_path)
+        print(f"Download finished for file: {abs_path}")
+        json_adder(project_name,abs_path)
+        pip_installer=GitCloneAndRunThread(install_arg[1],save_path,install_arg[2])
+        pip_installer.output_signal.connect(self.convert_Singnal2Info)
+        pip_installer.error_signal.connect(self.convert_Singnal2Info)
+        pip_installer.finished_signal.connect(self.PythonEnvDownloaderEnd)
+        pip_installer.start()
+
+    def PythonEnvDownloaderEnd(self):
+        self.demo_progress_button_text.setText("解压完成")
+        self.Refresh()
+        self.demo_progress_button_text.setEnabled(True)
+
+
+
+# thread = GitCloneAndRunThread('https://github.com/user/repo.git', '/path/to/clone', 'script.bat')
+# thread.output_signal.connect(lambda output: print("Output:", output))
+# thread.error_signal.connect(lambda error: print("Error:", error))
+# thread.finished_signal.connect(lambda: print("Finished"))
+# thread.start()
+
 
 
 

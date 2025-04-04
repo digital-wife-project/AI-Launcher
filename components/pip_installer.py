@@ -1,32 +1,50 @@
-﻿from PyQt5.QtCore import QThread, QProcess, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTextEdit, QPushButton
+﻿import subprocess
+import os
+from PyQt5.QtCore import QThread, pyqtSignal
 
-class CommandExecutorThread(QThread):
-    # 定义一个信号，用于将输出传递回主线程
+class GitCloneAndRunThread(QThread):
     output_signal = pyqtSignal(str)
+    error_signal = pyqtSignal(str)
+    finished_signal = pyqtSignal()
 
-    def __init__(self, commands, working_directory, parent=None):
-        super(CommandExecutorThread, self).__init__(parent)
-        self.commands = commands
-        self.working_directory = working_directory
+    def __init__(self, url, path, batpath):
+        print("开始pip安装")
+        super().__init__()
+        self.url = url
+        self.path = path
+        self.batpath = batpath
 
     def run(self):
-        for command in self.commands:
-            process = QProcess()
-            process.setWorkingDirectory(self.working_directory)
-            process.start(command)
+        try:
+            # 克隆 Git 仓库
+            # 注意：这里假设 Dulwich 已经导入，并且版本检查已完成
+            from dulwich import porcelain
+            porcelain.clone(self.url, self.path)
 
-            # 等待进程结束
-            process.waitForFinished(-1)  # -1 表示无限等待
+            # 构建批处理文件的完整路径
+            batfullpath = os.path.join(self.path, self.batpath)
 
-            # 读取输出
-            output = process.readAllStandardOutput().data().decode()
-            error = process.readAllStandardError().data().decode()
+            # 执行批处理文件
+            with subprocess.Popen(batfullpath, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, universal_newlines=True) as proc:
+                # 实时读取输出
+                for line in proc.stdout:
+                    self.output_signal.emit(line.strip())
+                # 等待进程结束
+                proc.wait()
+                # 检查错误输出
+                stderr = proc.stderr.read()
+                if stderr:
+                    self.error_signal.emit(stderr.strip())
 
-            # 发送信号，将输出传递回主线程
-            self.output_signal.emit(output)
-            if error:
-                self.output_signal.emit(error)
+            # 发射完成信号
+            self.finished_signal.emit()
 
-            # 确保进程被正确释放
-            process.close()
+        except Exception as e:
+            self.error_signal.emit(f"意外错误: {str(e)}")
+
+# 使用示例
+# thread = GitCloneAndRunThread('https://github.com/user/repo.git', '/path/to/clone', 'script.bat')
+# thread.output_signal.connect(lambda output: print("Output:", output))
+# thread.error_signal.connect(lambda error: print("Error:", error))
+# thread.finished_signal.connect(lambda: print("Finished"))
+# thread.start()
