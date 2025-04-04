@@ -9,13 +9,18 @@ class OpeniDownloadWorker(QThread):
 
     presentage_updated = pyqtSignal(int)
     on_download_finished = pyqtSignal()
-    finished_unzipping=pyqtSignal(str,str)
+    finished_unzipping=pyqtSignal(str,str,list)
 
-    def __init__(self,project_name, repoid, file, savepath):
+    def __init__(self,project_name, repoid, install_arg, savepath):
         super().__init__()
+        if isinstance(install_arg, str):
+            self.file = install_arg
+            self.install_arg = []
+        elif isinstance(install_arg, list):
+            self.file = install_arg[0]
+            self.install_arg = install_arg
         self.project_name=project_name
         self.repoid = repoid
-        self.file = file
         self.savepath = savepath
         self.running = True
         # 将正则表达式定义移到类级别
@@ -64,7 +69,7 @@ class OpeniDownloadWorker(QThread):
 
             # 发送信号表示解压完成
 
-            self.finished_unzipping.emit(self.project_name,(self.savepath+"//"+self.file)[:-4])
+            self.finished_unzipping.emit(self.project_name,(self.savepath+"//"+self.file)[:-4],self.install_arg)
 
 
     def stop(self):
