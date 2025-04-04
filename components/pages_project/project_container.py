@@ -14,7 +14,7 @@ from .model_windows import ModalDownloadDialog
 from ..openi_download import OpeniDownloadWorker
 from ..launcher import BatRunner
 from .DemoLabel import DemoLabel
-from ..pip_installer import GitCloneAndRunThread
+from ..pip_installer import GitCloneThread
 from .side_message import send_simple_message
 from ..json_changer import json_adder,loacl_project_json_reader
 
@@ -28,17 +28,18 @@ class Row_for_each_project(SiDenseHContainer):
         self.insatller=insatller
         self.project_detail=project_detail
         self.install_args=install_args
-
+        self.launcher_root=os.getcwd()
     
         self.demo_progress_button_text = SiProgressPushButton(self)
         self.demo_push_button_text = SiPushButtonRefactor(self)
-        self.Refresh()
+        self.RefreshText()
 
         self.demo_push_button_text.setText("项目管理")
-        self.demo_push_button_text.clicked.connect(lambda:self.Refresh())
+        self.demo_push_button_text.clicked.connect(lambda:self.RefreshText())
         self.demo_push_button_text.adjustSize()
 
         self.addWidget(DemoLabel(self,self.project_name,self.project_detail), "left")
+        self.addPlaceholder(500)
         self.addWidget(self.demo_progress_button_text, "right")
         self.addWidget(self.demo_push_button_text, "right")
         
@@ -56,7 +57,7 @@ class Row_for_each_project(SiDenseHContainer):
         self.launcher = BatRunner(f"{self.project_path}/launch.bat")
         self.launcher.runBatFile()
 
-    def Refresh(self):
+    def RefreshText(self):
         self.project_path=loacl_project_json_reader(self.project_name)
         if self.project_path !=None:
             self.demo_progress_button_text.setText("开始使用")
@@ -69,8 +70,14 @@ class Row_for_each_project(SiDenseHContainer):
         else:
             self.demo_progress_button_text.setText("开始下载")
             self.demo_progress_button_text.setToolTip("点击以开始下载")
+            self.demo_push_button_text.clicked.connect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args)))
             self.demo_progress_button_text.clicked.connect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args)))
             self.demo_progress_button_text.adjustSize()
+
+    def RefreshSize(self):
+        self.demo_progress_button_text.adjustSize()
+        self.demo_push_button_text.adjustSize()
+        self.adjustSize()
 
     def downloader(self,projectname,install_arg,user_path):
         self.demo_progress_button_text.setEnabled(False)
@@ -102,37 +109,42 @@ class Row_for_each_project(SiDenseHContainer):
         abs_path = os.path.abspath(save_path)
         print(f"Download finished for file: {abs_path}")
         json_adder(project_name,abs_path)
-        self.Refresh()
+        self.RefreshText()
         self.demo_progress_button_text.setEnabled(True)
 
-    def convert_Singnal2Info(self,signal_output):
+    def convert_Singnal2Info(self,type,signal_output):
         # 将信号转换为字符串信息
-        send_simple_message(0,signal_output,True)
+        send_simple_message(type,signal_output,True,1500)
 
-
-    def PythonEnvUnzipFinished(self,project_name,save_path,install_arg):
-        self.demo_progress_button_text.setText("Python解压完成")
+    def PythonEnvUnzipFinished(self, project_name, save_path, install_arg):
+        self.demo_progress_button_text.setText("部署中")
+        self.RefreshSize()       
         abs_path = os.path.abspath(save_path)
         print(f"Download finished for file: {abs_path}")
-        json_adder(project_name,abs_path)
-        pip_installer=GitCloneAndRunThread(install_arg[1],save_path,install_arg[2])
-        pip_installer.output_signal.connect(self.convert_Singnal2Info)
-        pip_installer.error_signal.connect(self.convert_Singnal2Info)
-        pip_installer.finished_signal.connect(self.PythonEnvDownloaderEnd)
-        pip_installer.start()
+        clone_path=(os.path.abspath(os.path.join(abs_path, os.pardir)))+"//"+project_name
+        json_adder(project_name, clone_path)
+        abs_bat_path = os.path.abspath(install_arg[2])
+        # 创建并启动线程
+        self.thread = GitCloneThread(install_arg[1],clone_path , abs_bat_path)
+        self.thread.outputsignal.connect(lambda output: self.convert_Singnal2Info(1,output))
+        self.thread.errorsignal.connect(lambda error: self.convert_Singnal2Info(4,error))
+        self.thread.finished.connect(self.on_thread_finished)  # 连接 finished 信号
+        self.thread.start()
 
-    def PythonEnvDownloaderEnd(self):
-        self.demo_progress_button_text.setText("解压完成")
-        self.Refresh()
+    def on_thread_finished(self):
+        os.chdir(self.launcher_root)
+        print("GitCloneThread 已完成。")
+        self.demo_progress_button_text.setText("安装完成")
+        self.RefreshSize()
+        self.RefreshText()
         self.demo_progress_button_text.setEnabled(True)
 
-
-
-# thread = GitCloneAndRunThread('https://github.com/user/repo.git', '/path/to/clone', 'script.bat')
-# thread.output_signal.connect(lambda output: print("Output:", output))
-# thread.error_signal.connect(lambda error: print("Error:", error))
-# thread.finished_signal.connect(lambda: print("Finished"))
-# thread.start()
+    def closeEvent(self, event):
+        # 在窗口关闭前确保线程已经停止
+        if self.thread.isRunning():
+            self.thread.terminate()
+            self.thread.wait()
+        event.accept()
 
 
 

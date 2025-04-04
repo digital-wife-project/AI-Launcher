@@ -13,7 +13,5 @@ SET FFMPEG_PATH=%cd%\py311\ffmpeg\bin
 SET PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%FFMPEG_PATH%;%PATH%
 set HF_ENDPOINT=https://hf-mirror.com
 set HF_HOME=%CD%\hf_download
-"%PYTHON_EXECUTABLE%" -m pip install --upgrade pip
-"%PYTHON_EXECUTABLE%" -m pip install --upgrade -r requirements.txt
-"%PYTHON_EXECUTABLE%" -m pip install --upgrade transformers 
-exit
+"%PYTHON_EXECUTABLE%" ./web_demo.py
+

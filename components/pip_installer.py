@@ -1,50 +1,60 @@
-﻿import subprocess
+﻿import sys
 import os
 from PyQt5.QtCore import QThread, pyqtSignal
+import subprocess
+import shutil
 
-class GitCloneAndRunThread(QThread):
-    output_signal = pyqtSignal(str)
-    error_signal = pyqtSignal(str)
-    finished_signal = pyqtSignal()
+class GitCloneThread(QThread):
+    # 定义信号，用于发送输出和错误信息
+    outputsignal = pyqtSignal(str)
+    errorsignal = pyqtSignal(str)
 
-    def __init__(self, url, path, batpath):
-        print("开始pip安装")
-        super().__init__()
-        self.url = url
-        self.path = path
+    def __init__(self, repourl, clonedir, batpath):
+        super(GitCloneThread, self).__init__()
+        self.gitpath = "./PortableGit/bin/git.exe"
+        self.repourl = repourl
+        self.clonedir = clonedir
         self.batpath = batpath
 
     def run(self):
         try:
-            # 克隆 Git 仓库
-            # 注意：这里假设 Dulwich 已经导入，并且版本检查已完成
-            from dulwich import porcelain
-            porcelain.clone(self.url, self.path)
+            print("开始克隆仓库...")
+            self.outputsignal.emit("开始克隆仓库...")
+            result = subprocess.run([self.gitpath, 'clone', self.repourl, self.clonedir],
+                                    check=True, text=True, capture_output=True)
+            self.outputsignal.emit(result.stdout)
 
-            # 构建批处理文件的完整路径
-            batfullpath = os.path.join(self.path, self.batpath)
+            print("克隆完成")
+            os.chdir(self.clonedir)
+            self.outputsignal.emit(f"切换到目录: {self.clonedir}")
 
-            # 执行批处理文件
-            with subprocess.Popen(batfullpath, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, universal_newlines=True) as proc:
-                # 实时读取输出
-                for line in proc.stdout:
-                    self.output_signal.emit(line.strip())
-                # 等待进程结束
-                proc.wait()
-                # 检查错误输出
-                stderr = proc.stderr.read()
-                if stderr:
-                    self.error_signal.emit(stderr.strip())
+            print("开始执行.bat文件...")
+            self.outputsignal.emit("开始执行.bat文件...")
+            with subprocess.Popen(self.batpath+"//install.bat", stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, universal_newlines=True) as process:
+                for line in process.stdout:
+                    self.outputsignal.emit(line.strip())
+                process.stdout.close()
+                returncode = process.wait()
+                if returncode:
+                    raise subprocess.CalledProcessError(returncode, process.args, process.stderr.read())
+            print(".bat文件执行完成")
+            # .bat 文件执行完成后，复制 .bat 文件到 clonedir
+            self.copy_bat_file_to_clonedir()
 
-            # 发射完成信号
-            self.finished_signal.emit()
+        except subprocess.CalledProcessError as e:
+            self.errorsignal.emit(e.stderr)
+        finally:
+            # 退出线程
+            self.quit()
 
-        except Exception as e:
-            self.error_signal.emit(f"意外错误: {str(e)}")
-
-# 使用示例
-# thread = GitCloneAndRunThread('https://github.com/user/repo.git', '/path/to/clone', 'script.bat')
-# thread.output_signal.connect(lambda output: print("Output:", output))
-# thread.error_signal.connect(lambda error: print("Error:", error))
-# thread.finished_signal.connect(lambda: print("Finished"))
-# thread.start()
+    def copy_bat_file_to_clonedir(self):
+        # 获取.bat文件的文件名
+        bat_filename = os.path.basename(self.batpath+"//launch.bat")
+        # 目标路径
+        destination_path = os.path.join(self.clonedir, bat_filename)
+        try:
+            # 复制文件
+            shutil.copy(self.batpath, destination_path)
+            self.outputsignal.emit(f"launch.bat 文件已复制到: {destination_path}")
+        except IOError as e:
+            self.errorsignal.emit(f"复制 .bat 文件失败: {e}")
