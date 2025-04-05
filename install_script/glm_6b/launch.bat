@@ -1,5 +1,5 @@
-﻿@echo off
-set PYTHON_PATH=..\py311
+﻿rem overriding default python env vars in order not to interfere with any system python installation
+set PYTHON_PATH=.\py311\
 rem overriding default python env vars in order not to interfere with any system python installation
 SET PYTHONHOME=
 SET PYTHONPATH=
@@ -14,4 +14,4 @@ SET PATH=%PYTHON_PATH%;%PYTHON_PATH%\Scripts;%FFMPEG_PATH%;%PATH%
 set HF_ENDPOINT=https://hf-mirror.com
 set HF_HOME=%CD%\hf_download
 "%PYTHON_EXECUTABLE%" ./web_demo.py
-
+pause
