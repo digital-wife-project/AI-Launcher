@@ -14,7 +14,7 @@ from .model_windows import ModalDownloadDialog
 from ..openi_download import OpeniDownloadWorker
 from ..launcher import BatRunner
 from .DemoLabel import DemoLabel
-from ..pip_installer import GitCloneThread
+from ..pip_installer import GitCloneThread,BatExecutionThread
 from .side_message import send_simple_message
 from ..json_changer import json_adder,loacl_project_json_reader
 
@@ -79,23 +79,25 @@ class Row_for_each_project(SiDenseHContainer):
         self.demo_push_button_text.adjustSize()
         self.adjustSize()
 
-    def downloader(self,projectname,install_arg,user_path):
+    def downloader(self,project_name,install_arg,user_path):
         self.demo_progress_button_text.setEnabled(False)
         self.demo_progress_button_text.setText("正在下载")
         if self.insatller=="openi":
             print("使用openi下载")
-            self.download_worker = OpeniDownloadWorker(projectname,"wyyyz/dig",install_arg,user_path)
+            self.download_worker = OpeniDownloadWorker(project_name,"wyyyz/dig",install_arg,user_path)
             self.download_worker.presentage_updated.connect(self.presentage_updated)
             self.download_worker.on_download_finished.connect(self.download_finished)
             self.download_worker.finished_unzipping.connect(self.OpeniunzipFinished)
             self.download_worker.start()
         if self.insatller=="pip":
             print("使用pip下载")
-            self.download_worker = OpeniDownloadWorker(projectname,"wyyyz/dig",install_arg,user_path)
-            self.download_worker.presentage_updated.connect(self.presentage_updated)
-            self.download_worker.on_download_finished.connect(self.download_finished)
-            self.download_worker.finished_unzipping.connect(self.PythonEnvUnzipFinished)
-            self.download_worker.start()
+            self.demo_progress_button_text.setText("部署中")
+            self.RefreshSize()       
+            self.git_clone_thread = GitCloneThread(install_arg, user_path, project_name)
+            self.git_clone_thread.outputsignal.connect(lambda output: self.convert_Singnal2Info(1,output))
+            self.git_clone_thread.errorsignal.connect(lambda error: self.convert_Singnal2Info(4,error))
+            self.git_clone_thread.clone_completed.connect(self.on_clone_thread_finished)  # 连接 finished 信号
+            self.git_clone_thread.start()  # 启动线程
 
     def presentage_updated(self, percentage):
         self.demo_progress_button_text.setProgress(percentage/100)
@@ -116,18 +118,28 @@ class Row_for_each_project(SiDenseHContainer):
         # 将信号转换为字符串信息
         send_simple_message(type,signal_output,True,1500)
 
+    def on_clone_thread_finished(self,clonedir,projectname,install_args_list):
+        self.demo_progress_button_text.setText("克隆完成")
+        self.RefreshSize()
+        self.RefreshText()
+        self.download_worker = OpeniDownloadWorker(projectname,"wyyyz/dig",install_args_list,clonedir)
+        self.download_worker.presentage_updated.connect(self.presentage_updated)
+        self.download_worker.on_download_finished.connect(self.download_finished)
+        self.download_worker.finished_unzipping.connect(self.PythonEnvUnzipFinished)
+        self.download_worker.start()
+
+
     def PythonEnvUnzipFinished(self, project_name, save_path, install_arg):
-        self.demo_progress_button_text.setText("部署中")
+        self.demo_progress_button_text.setText("pip安装中")
         self.RefreshSize()       
         abs_path = os.path.abspath(save_path)
         print(f"Download finished for file: {abs_path}")
-        clone_path=(os.path.abspath(os.path.join(abs_path, os.pardir)))+"//"+project_name
-        json_adder(project_name, clone_path)
+        project_bat_path=(os.path.abspath(os.path.join(abs_path, os.pardir)))
+        # json_adder(project_name, project_bat_path)
         abs_bat_path = os.path.abspath(install_arg[2])
         # 创建并启动线程
-        self.thread = GitCloneThread(install_arg[1],clone_path , abs_bat_path)
+        self.thread = BatExecutionThread(abs_bat_path,project_bat_path)
         self.thread.outputsignal.connect(lambda output: self.convert_Singnal2Info(1,output))
-        self.thread.errorsignal.connect(lambda error: self.convert_Singnal2Info(4,error))
         self.thread.finished.connect(self.on_thread_finished)  # 连接 finished 信号
         self.thread.start()
 

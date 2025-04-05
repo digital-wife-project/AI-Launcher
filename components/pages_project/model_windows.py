@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QFileDialog
 from siui.templates.application.components.dialog.modal import SiModalDialog
 
 from siui.core import SiGlobal
-
+import os
 from ..option_card import OptionCardPlaneForWidgetDemos
 from .side_message import send_simple_message
 
@@ -47,7 +47,7 @@ class ModalDownloadDialog(SiModalDialog):
         self.button3.setFixedHeight(32)
         self.button3.attachment().setText("开始下载与安装")
         self.button3.colorGroup().assign(SiColor.BUTTON_PANEL, self.getColor(SiColor.INTERFACE_BG_D))
-        self.button3.clicked.connect(lambda: parent.on_download_click.emit(self.file_name,self.user_path))
+        self.button3.clicked.connect(lambda: parent.on_download_click.emit(self.file_name,os.path.abspath(self.user_path)))
         self.button3.clicked.connect(SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().closeLayer)
 
         button4 = SiPushButton(self)
