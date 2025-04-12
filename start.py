@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 import time
 
 from PyQt5.QtCore import QTimer
@@ -52,11 +52,10 @@ if __name__ == "__main__":
     #     restart_as_admin()
     #     sys.exit(0)  # Exit the current instance
 
-
     window = MySiliconApp()
     window.show()
 
-    timer = QTimer(window)
-    timer.singleShot(500, lambda: show_version_message(window))
+    # timer = QTimer(window)
+    # timer.singleShot(500, lambda: show_version_message(window))
 
     sys.exit(app.exec_())
