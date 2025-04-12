@@ -1,4 +1,4 @@
-﻿from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal
 from siui.components import (
     SiDenseHContainer,
     )
@@ -9,6 +9,8 @@ from siui.components.button import (
 from siui.core import SiGlobal
 
 import os
+import shutil
+
 from .project_detail import ChildPage_ProjectDetail
 from .model_windows import ModalDownloadDialog
 from ..openi_download import OpeniDownloadWorker
@@ -81,6 +83,7 @@ class Row_for_each_project(SiDenseHContainer):
 
     def downloader(self,project_name,install_arg,user_path):
         self.demo_progress_button_text.setEnabled(False)
+        self.demo_push_button_text.setEnabled(False)
         self.demo_progress_button_text.setText("正在下载")
         if self.insatller=="openi":
             print("使用openi下载")
@@ -92,7 +95,10 @@ class Row_for_each_project(SiDenseHContainer):
         if self.insatller=="pip":
             print("使用pip下载")
             self.demo_progress_button_text.setText("部署中")
-            self.RefreshSize()       
+            self.RefreshSize()   
+
+            # self.PythonEnvUnzipFinished("GLM-6B",'D:\\test/GLM-6b//py311',['py311.zip', 'https://github.moeyy.xyz/https://github.com/THUDM/ChatGLM-6B.git', './install_script/glm_6b'])
+
             self.git_clone_thread = GitCloneThread(install_arg, user_path, project_name)
             self.git_clone_thread.outputsignal.connect(lambda output: self.convert_Singnal2Info(1,output))
             self.git_clone_thread.errorsignal.connect(lambda error: self.convert_Singnal2Info(4,error))
@@ -135,20 +141,23 @@ class Row_for_each_project(SiDenseHContainer):
         abs_path = os.path.abspath(save_path)
         print(f"Download finished for file: {abs_path}")
         project_bat_path=(os.path.abspath(os.path.join(abs_path, os.pardir)))
-        # json_adder(project_name, project_bat_path)
         abs_bat_path = os.path.abspath(install_arg[2])
+        shutil.copy(abs_bat_path+"\\install.bat", project_bat_path)
+        shutil.copy(abs_bat_path+"\\launch.bat", project_bat_path)
         # 创建并启动线程
-        self.thread = BatExecutionThread(abs_bat_path,project_bat_path)
+        self.thread = BatExecutionThread(project_bat_path,project_name)
         self.thread.outputsignal.connect(lambda output: self.convert_Singnal2Info(1,output))
-        self.thread.finished.connect(self.on_thread_finished)  # 连接 finished 信号
+        self.thread.pip_finished.connect(self.on_pip_install_thread_finished)  # 连接 finished 信号
         self.thread.start()
 
-    def on_thread_finished(self):
+    def on_pip_install_thread_finished(self,project_path,project_name):
         os.chdir(self.launcher_root)
         print("GitCloneThread 已完成。")
-        self.demo_progress_button_text.setText("安装完成")
+        json_adder(project_name, project_path)
+        self.demo_progress_button_text.setText("启动")
         self.RefreshSize()
         self.RefreshText()
+        self.demo_push_button_text.setEnabled(True)
         self.demo_progress_button_text.setEnabled(True)
 
     def closeEvent(self, event):
@@ -157,9 +166,3 @@ class Row_for_each_project(SiDenseHContainer):
             self.thread.terminate()
             self.thread.wait()
         event.accept()
-
-
-
-
-
-     
