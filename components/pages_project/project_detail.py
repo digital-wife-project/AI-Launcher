@@ -1,26 +1,11 @@
 ﻿from PyQt5.QtWidgets import QFileDialog
 from siui.components import (
-    SiLabel,
-    SiDenseHContainer,
-    SiDividedHContainer,
-    SiDividedVContainer,
-    SiFlowContainer,
-    SiDraggableLabel, 
-    SiSimpleButton, 
     SiPushButton, 
-    SiMasonryContainer,
-    SiCircularProgressBar,
-    SiDenseVContainer,
-    SiLineEditWithDeletionButton,
-    SiLineEditWithItemName,
-    SiOptionCardLinear,
     SiTitledWidgetGroup,
     SiOptionCardPlane,
-    SiWidget,
     )
 from siui.core import Si, SiColor, SiGlobal,GlobalFont
 from siui.components.page.child_page import SiChildPage
-
 
 import re
 from .DemoLabel import DemoLabel
@@ -62,33 +47,31 @@ class ChildPage_ProjectDetail(SiChildPage):
 
             self.option_card_general2 = SiOptionCardPlane(self)
             self.option_card_general2.setTitle("项目位置设置")
+
             self.button3 = SiPushButton(self)
             self.button3.setFixedHeight(32)
             self.button3.attachment().setText("删除项目")
             self.button3.clicked.connect(self.delete_project)
+
             self.button4 = SiPushButton(self)
             self.button4.setFixedHeight(32)
             self.button4.attachment().setText("重装项目")
             self.button4.clicked.connect(self.delete_project)
+
             self.option_card_general2.body().addWidget(self.button3)
             self.option_card_general2.body().addPlaceholder(12)
             self.option_card_general2.adjustSize()
-
             group.addWidget(self.option_card_general)
             group.addWidget(self.option_card_general2)
 
         self.content().setAttachment(self.titled_widget_group)
-
-
 
         # control panel
         self.demo_button = SiPushButton(self)
         self.demo_button.resize(128, 32)
         self.demo_button.attachment().setText("保存")
         self.demo_button.clicked.connect(self.closeParentLayer)
-
         self.demo_button.clicked.connect(lambda: self.onSaveButtomClicked(parent))
-
         self.panel().addWidget(self.demo_button, "right")
 
         # load style sheet
@@ -114,6 +97,8 @@ class ChildPage_ProjectDetail(SiChildPage):
                 self.changed_path = folder_path.replace("/", "\\")
                 self.button2.attachment().setText(f"更改安装位置为{self.changed_path}")
                 self.demo_button.setEnabled(True)
+
+
     def delete_project(self):
         # 删除项目文件夹{self.project_path}
         os.system("rmdir /s /q "f"{self.project_path}")

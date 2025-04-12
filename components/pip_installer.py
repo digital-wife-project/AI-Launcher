@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import os
 from PyQt5.QtCore import QThread, pyqtSignal
 import subprocess
@@ -6,7 +6,7 @@ import subprocess
 class GitCloneThread(QThread):
     # 定义信号，用于发送输出和错误信息
     outputsignal = pyqtSignal(str)
-    errorsignal = pyqtSignal(str)
+    errorsignal = pyqtSignal(str,str)
     clone_completed = pyqtSignal(str, str, list)  # 新增信号，用于通知克隆完成
 
     def __init__(self, install_args, user_path, project_name):
@@ -42,7 +42,7 @@ class GitCloneThread(QThread):
             self.clone_completed.emit(self.clonedir, self.project_name, self.install_args)  # 发送克隆完成信号
 
         except subprocess.CalledProcessError as e:
-            self.errorsignal.emit(e.output)  # 发射错误信息
+            self.errorsignal.emit(e.output,self.clonedir)  # 发射错误信息
         finally:
             # 退出线程
             self.quit()
@@ -50,6 +50,7 @@ class GitCloneThread(QThread):
 class BatExecutionThread(QThread):
     # 定义信号，用于发送输出信息
     outputsignal = pyqtSignal(str)
+    errorsignal = pyqtSignal(str,str)
     pip_finished = pyqtSignal(str, str)  # 假设信号需要传递这些参数
 
     def __init__(self, clonedir, project_name):
@@ -83,7 +84,7 @@ class BatExecutionThread(QThread):
             # 处理错误情况
             error_message = f"安装失败: {e}"
             print(error_message)
-            self.outputsignal.emit(error_message)
+            self.errorsignal.emit(error_message,self.clonedir)
         finally:
             # 退出线程
             self.quit()

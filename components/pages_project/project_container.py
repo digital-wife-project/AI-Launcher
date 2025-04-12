@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, pyqtSignal
+﻿from PyQt5.QtCore import Qt, pyqtSignal
 from siui.components import (
     SiDenseHContainer,
     )
@@ -15,6 +15,7 @@ from .project_detail import ChildPage_ProjectDetail
 from .model_windows import ModalDownloadDialog
 from ..openi_download import OpeniDownloadWorker
 from ..launcher import BatRunner
+from ..FolderMover import DeleteFolderThread
 from .DemoLabel import DemoLabel
 from ..pip_installer import GitCloneThread,BatExecutionThread
 from .side_message import send_simple_message
@@ -96,12 +97,9 @@ class Row_for_each_project(SiDenseHContainer):
             print("使用pip下载")
             self.demo_progress_button_text.setText("部署中")
             self.RefreshSize()   
-
-            # self.PythonEnvUnzipFinished("GLM-6B",'D:\\test/GLM-6b//py311',['py311.zip', 'https://github.moeyy.xyz/https://github.com/THUDM/ChatGLM-6B.git', './install_script/glm_6b'])
-
             self.git_clone_thread = GitCloneThread(install_arg, user_path, project_name)
-            self.git_clone_thread.outputsignal.connect(lambda output: self.convert_Singnal2Info(1,output))
-            self.git_clone_thread.errorsignal.connect(lambda error: self.convert_Singnal2Info(4,error))
+            self.git_clone_thread.outputsignal.connect(lambda output: send_simple_message(1,output,True,1500))
+            self.git_clone_thread.errorsignal.connect(lambda error,project_path: self.HandleInstallError(error,project_path))
             self.git_clone_thread.clone_completed.connect(self.on_clone_thread_finished)  # 连接 finished 信号
             self.git_clone_thread.start()  # 启动线程
 
@@ -120,10 +118,6 @@ class Row_for_each_project(SiDenseHContainer):
         self.RefreshText()
         self.demo_progress_button_text.setEnabled(True)
 
-    def convert_Singnal2Info(self,type,signal_output):
-        # 将信号转换为字符串信息
-        send_simple_message(type,signal_output,True,1500)
-
     def on_clone_thread_finished(self,clonedir,projectname,install_args_list):
         self.demo_progress_button_text.setText("克隆完成")
         self.RefreshSize()
@@ -133,7 +127,6 @@ class Row_for_each_project(SiDenseHContainer):
         self.download_worker.on_download_finished.connect(self.download_finished)
         self.download_worker.finished_unzipping.connect(self.PythonEnvUnzipFinished)
         self.download_worker.start()
-
 
     def PythonEnvUnzipFinished(self, project_name, save_path, install_arg):
         self.demo_progress_button_text.setText("pip安装中")
@@ -146,9 +139,26 @@ class Row_for_each_project(SiDenseHContainer):
         shutil.copy(abs_bat_path+"\\launch.bat", project_bat_path)
         # 创建并启动线程
         self.thread = BatExecutionThread(project_bat_path,project_name)
-        self.thread.outputsignal.connect(lambda output: self.convert_Singnal2Info(1,output))
-        self.thread.pip_finished.connect(self.on_pip_install_thread_finished)  # 连接 finished 信号
+        self.thread.outputsignal.connect(lambda output: send_simple_message(1,output,True,1500))
+        self.thread.pip_finished.connect(self.on_pip_install_thread_finished)
+        self.thread.errorsignal.connect(lambda error,project_path: self.HandleInstallError(error,project_path))
+        # 连接 finished 信号
         self.thread.start()
+
+    def HandleInstallError(self, error,project_path):
+        send_simple_message(4,error,False,1500)
+        self.demo_progress_button_text.setText("安装失败")
+        self.RefreshSize()
+        send_simple_message(4,"安装失败，正在删除缓存",False,1500)
+        delete_thread = DeleteFolderThread(project_path)
+        delete_thread.finished_signal.connect(self.HandleInstallErrorAfterDelete)
+        delete_thread.start()
+
+    def HandleInstallErrorAfterDelete(self):
+        send_simple_message(4,"安装失败，请尝试重装",False,1500)
+        self.demo_progress_button_text.setText("重新安装")
+        self.demo_progress_button_text.setEnabled(True)
+        self.demo_push_button_text.setEnabled(True)
 
     def on_pip_install_thread_finished(self,project_path,project_name):
         os.chdir(self.launcher_root)

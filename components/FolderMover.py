@@ -1,7 +1,6 @@
 ﻿import os
 import shutil
 from PyQt5.QtCore import QThread, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QProgressDialog, QVBoxLayout
 
 class FolderMover(QThread):
     progress_updated = pyqtSignal(int)  # Signal to update the progress
@@ -39,3 +38,16 @@ class FolderMover(QThread):
                     print(f"Error moving {file_path}: {e}")
 
         self.finished.emit()
+
+
+class DeleteFolderThread(QThread):
+    finished_signal = pyqtSignal()  # 删除完成信号
+
+    def __init__(self, folder_path):
+        super().__init__()
+        self.folder_path = folder_path
+
+    def run(self):
+        os.system("rmdir /s /q "f"{self.folder_path}")
+        self.finished_signal.emit()
+        self.quit()  # 确保发射完成信号
