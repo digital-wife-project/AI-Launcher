@@ -1,4 +1,4 @@
-﻿import os
+import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTextEdit
 from PyQt5.QtCore import QObject, QProcess
 
