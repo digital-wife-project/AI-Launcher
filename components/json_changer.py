@@ -64,4 +64,17 @@ def json_rewriter(project_name:str, project_path:str):
     with open(json_file_path, 'w', encoding='utf-8-sig') as file:
         file.write(updated_json_data)
     
+def json_deleter(key_to_remove):
+
+    # 读取JSON文件
+    with open('./config/local_project.json', 'r') as file:
+        data = json.load(file)
+    
+    # 移除指定的键
+    if key_to_remove in data:
+        del data[key_to_remove]
+    
+    # 将修改后的字典写回JSON文件
+    with open('data.json', 'w') as file:
+        json.dump(data, file, indent=4)
     

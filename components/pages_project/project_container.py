@@ -32,6 +32,7 @@ class Row_for_each_project(SiDenseHContainer):
         self.project_detail=project_detail
         self.install_args=install_args
         self.launcher_root=os.getcwd()
+        self.model_windows_connection=None
     
         self.setFixedWidth(900)
         self.demo_progress_button_text = SiProgressPushButton(self)
@@ -54,6 +55,9 @@ class Row_for_each_project(SiDenseHContainer):
 
         self.on_download_click.connect(self.download_click)
 
+    def Open_model_windows(self):
+        SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args))
+
     def download_click(self,file_name,user_path):
         self.downloader(self.project_name,file_name,user_path)
 
@@ -75,8 +79,8 @@ class Row_for_each_project(SiDenseHContainer):
         else:
             self.demo_progress_button_text.setText("开始下载")
             self.demo_progress_button_text.setToolTip("点击以开始下载")
-            self.demo_push_button_text.clicked.connect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args)))
-            self.demo_progress_button_text.clicked.connect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args)))
+            self.model_windows_connection=self.demo_push_button_text.clicked.connect(self.Open_model_windows)
+            self.demo_progress_button_text.clicked.connect(self.Open_model_windows)
             self.demo_progress_button_text.adjustSize()
 
     def RefreshSize(self):
@@ -116,12 +120,12 @@ class Row_for_each_project(SiDenseHContainer):
         self.demo_progress_button_text.setText("解压完成")
         abs_path = os.path.abspath(save_path)
         print(f"Download finished for file: {abs_path}")
+        self.demo_push_button_text.disconnect(self.model_windows_connection)
+        self.demo_push_button_text.setEnabled(True)
+        self.demo_progress_button_text.setEnabled(True)
         json_adder(project_name,abs_path)
         self.RefreshText()
         self.RefreshSize()
-        self.demo_push_button_text.disconnect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args)))
-        self.demo_push_button_text.setEnabled(True)
-        self.demo_progress_button_text.setEnabled(True)
 
     def on_clone_thread_finished(self,clonedir,projectname,install_args_list):
         self.demo_progress_button_text.setText("克隆完成")
@@ -172,7 +176,7 @@ class Row_for_each_project(SiDenseHContainer):
         self.demo_progress_button_text.setText("启动")
         self.RefreshSize()
         self.RefreshText()
-        self.demo_push_button_text.disconnect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args)))
+        self.demo_push_button_text.disconnect(self.model_windows_connection)
         self.demo_push_button_text.setEnabled(True)
         self.demo_progress_button_text.setEnabled(True)
 

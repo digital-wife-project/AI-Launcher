@@ -78,8 +78,3 @@ class ModalDownloadDialog(SiModalDialog):
                     f'<span style="color: {self.getColor(SiColor.TEXT_B)}">当前安装位置{self.user_path}</span><br>'
                     )
                 self.button3.setEnabled(True)
-
-
-
-
-

@@ -5,15 +5,15 @@ from siui.components import (
     SiDenseHContainer,
     SiOptionCardPlane,
     )
-from siui.core import Si, SiColor, SiGlobal,GlobalFont
+from siui.core import SiColor, SiGlobal,GlobalFont
 from siui.components.page.child_page import SiChildPage
 
 import re
 from .DemoLabel import DemoLabel
+from .yes_no_model_windows import YesNoModelWindows
 from .side_message import send_simple_message
-from ..json_changer import json_rewriter
-from ..FolderMover import FolderMover
-import os
+from ..json_changer import json_rewriter,json_deleter
+from ..FolderMover import FolderMover,DeleteFolderThread
 
 class ChildPage_ProjectDetail(SiChildPage):
     def __init__(self,parent,project_name,project_path):
@@ -53,12 +53,12 @@ class ChildPage_ProjectDetail(SiChildPage):
             self.button3 = SiPushButton(self)
             self.button3.setFixedHeight(32)
             self.button3.attachment().setText("删除项目")
-            self.button3.clicked.connect(self.delete_project)
+            self.button3.clicked.connect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(YesNoModelWindows(self,"delet")))
 
             self.button4 = SiPushButton(self)
             self.button4.setFixedHeight(32)
             self.button4.attachment().setText("重装项目")
-            self.button4.clicked.connect(self.delete_project)
+            self.button4.clicked.connect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(YesNoModelWindows(self,"reinstall")))
 
             self.h_container.addWidget(self.button3)
             self.h_container.addWidget(self.button4)
@@ -87,6 +87,10 @@ class ChildPage_ProjectDetail(SiChildPage):
 
     def onSaveButtomClicked(self,parent):
         if self.changed_path!=None:
+            parent.demo_progress_button_text.setEnabled(False)
+            parent.demo_push_button_text.setEnabled(False)
+            parent.demo_progress_button_text.setText("正在迁移")
+            parent.demo_progress_button_text.adjustSize()
             self.folder_Mover=FolderMover(self.project_path,self.changed_path)
             self.folder_Mover.progress_updated.connect(parent.presentage_updated)
             self.folder_Mover.start()
@@ -106,7 +110,19 @@ class ChildPage_ProjectDetail(SiChildPage):
                 self.button2.attachment().setText(f"更改安装位置为{self.changed_path}")
                 self.demo_button.setEnabled(True)
 
+    def ProjectOperation(self,operation):
+        if operation=="delet":
+            self.delete_project()
+        elif operation=="reinstall":
+            self.reinstall_project()
 
     def delete_project(self):
         # 删除项目文件夹{self.project_path}
-        os.system("rmdir /s /q "f"{self.project_path}")
+        send_simple_message(1,"开始删除",True,3000)
+        delete_thread = DeleteFolderThread(self.project_path)
+        delete_thread.finished_signal.connect(self.on_delete_project_finished)
+        delete_thread.start()
+
+    def on_delete_project_finished(self):
+        json_deleter(self.project_name)
+        send_simple_message(1,"删除成功",True,3000)
