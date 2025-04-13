@@ -1,8 +1,9 @@
 ﻿import subprocess
 import re
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
+from .pages_project.side_message import send_simple_message
 import zipfile
-import sys
+import os
 
 
 class OpeniDownloadWorker(QThread):
@@ -27,30 +28,39 @@ class OpeniDownloadWorker(QThread):
         self.regex_percentage = re.compile(r"(\d+)%")
 
     def run(self):
-        filepath = "openi dataset download"
-        arguments = f" {self.repoid} {self.file} --cluster NPU --save_path ./tmp/"
-        command = f"{filepath} {arguments}"
-        print(command)
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, encoding='utf-8',errors='replace')
+        if self.file_exists("./tmp/",self.file):
+            send_simple_message(0,"已下载，从缓存中读取",True,5000)
+            self.on_download_finished.emit()
+            self.unzip(f"./tmp/{self.file}",self.savepath)
+        else:
+            filepath = "openi dataset download"
+            arguments = f" {self.repoid} {self.file} --cluster NPU --save_path ./tmp/"
+            command = f"{filepath} {arguments}"
+            print(command)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, encoding='utf-8',errors='replace')
 
-        for line in iter(process.stdout.readline, ''):
-            if not self.running:
-                break
-            percentage = self.attackdetail(line)
-            if percentage:
-                self.presentage_updated.emit(int(percentage))
+            for line in iter(process.stdout.readline, ''):
+                if not self.running:
+                    break
+                percentage = self.attackdetail(line)
+                if percentage:
+                    self.presentage_updated.emit(int(percentage))
+            process.stdout.close()
+            process.wait()
 
-        self.on_download_finished.emit()
-        self.unzip(f"./tmp/{self.file}",self.savepath)
+            self.on_download_finished.emit()
+            self.unzip(f"./tmp/{self.file}",self.savepath)
 
-        process.stdout.close()
-        process.wait()
+    def file_exists(self,directory, filename):
+        # 构造完整的文件路径
+        file_path = os.path.join(directory, filename)
+        # 检查文件是否存在
+        return os.path.isfile(file_path)
 
     def attackdetail(self, line):
         match_percentage = self.regex_percentage.search(line)
         percentage = match_percentage.group(1) if match_percentage else None
         return percentage
-    
     
     def unzip(self,zip_file_path:str,extract_path:str):
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
