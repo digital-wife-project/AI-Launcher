@@ -2,6 +2,7 @@
 from siui.components import (
     SiPushButton, 
     SiTitledWidgetGroup,
+    SiDenseHContainer,
     SiOptionCardPlane,
     )
 from siui.core import Si, SiColor, SiGlobal,GlobalFont
@@ -46,8 +47,9 @@ class ChildPage_ProjectDetail(SiChildPage):
             self.option_card_general.adjustSize()
 
             self.option_card_general2 = SiOptionCardPlane(self)
-            self.option_card_general2.setTitle("项目位置设置")
+            self.option_card_general2.setTitle("项目状态设置")
 
+            self.h_container = SiDenseHContainer(self)
             self.button3 = SiPushButton(self)
             self.button3.setFixedHeight(32)
             self.button3.attachment().setText("删除项目")
@@ -58,7 +60,13 @@ class ChildPage_ProjectDetail(SiChildPage):
             self.button4.attachment().setText("重装项目")
             self.button4.clicked.connect(self.delete_project)
 
-            self.option_card_general2.body().addWidget(self.button3)
+            self.h_container.addWidget(self.button3)
+            self.h_container.addWidget(self.button4)
+            self.h_container.setAdjustWidgetsSize(True)
+            self.h_container.addPlaceholder(12)
+            self.h_container.adjustSize()
+
+            self.option_card_general2.body().addWidget(self.h_container)
             self.option_card_general2.body().addPlaceholder(12)
             self.option_card_general2.adjustSize()
             group.addWidget(self.option_card_general)

@@ -33,7 +33,6 @@ class digitalhuman(SiPage):
             self.dense_v_container.setTitle("竖直密堆积容器")
 
             self.demo_dense_v_container = SiDenseVContainer(self)
-            self.demo_dense_v_container.setFixedHeight(300)
             self.push_buttons = OptionCardPlaneForWidgetDemos(self)
 
             for key, value in self.project_dic.items():
@@ -42,6 +41,7 @@ class digitalhuman(SiPage):
             self.dense_v_container.body().addWidget(self.demo_dense_v_container)
             self.dense_v_container.body().addPlaceholder(12)
             self.dense_v_container.adjustSize()
+            self.demo_dense_v_container.arrangeWidget()
 
             group.addWidget(self.dense_v_container)
         # 添加页脚的空白以增加美观性
@@ -49,6 +49,3 @@ class digitalhuman(SiPage):
 
         # 设置控件组为页面对象
         self.setAttachment(self.titled_widgets_group)
-
-
-

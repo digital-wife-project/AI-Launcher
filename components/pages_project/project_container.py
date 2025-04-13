@@ -33,6 +33,7 @@ class Row_for_each_project(SiDenseHContainer):
         self.install_args=install_args
         self.launcher_root=os.getcwd()
     
+        self.setFixedWidth(900)
         self.demo_progress_button_text = SiProgressPushButton(self)
         self.demo_push_button_text = SiPushButtonRefactor(self)
         self.RefreshText()
@@ -42,13 +43,14 @@ class Row_for_each_project(SiDenseHContainer):
         self.demo_push_button_text.adjustSize()
 
         self.addWidget(DemoLabel(self,self.project_name,self.project_detail), "left")
-        self.addPlaceholder(500)
+        # self.addPlaceholder(500)
         self.addWidget(self.demo_progress_button_text, "right")
         self.addWidget(self.demo_push_button_text, "right")
         
         self.setAdjustWidgetsSize(True)
         self.addPlaceholder(12)
         self.adjustSize()
+        self.arrangeWidget()
 
         self.on_download_click.connect(self.download_click)
 
@@ -116,6 +118,9 @@ class Row_for_each_project(SiDenseHContainer):
         print(f"Download finished for file: {abs_path}")
         json_adder(project_name,abs_path)
         self.RefreshText()
+        self.RefreshSize()
+        self.demo_push_button_text.disconnect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args)))
+        self.demo_push_button_text.setEnabled(True)
         self.demo_progress_button_text.setEnabled(True)
 
     def on_clone_thread_finished(self,clonedir,projectname,install_args_list):
@@ -167,6 +172,7 @@ class Row_for_each_project(SiDenseHContainer):
         self.demo_progress_button_text.setText("启动")
         self.RefreshSize()
         self.RefreshText()
+        self.demo_push_button_text.disconnect(lambda: SiGlobal.siui.windows["MAIN_WINDOW"].layerModalDialog().setDialog(ModalDownloadDialog(self,self.install_args)))
         self.demo_push_button_text.setEnabled(True)
         self.demo_progress_button_text.setEnabled(True)
 
