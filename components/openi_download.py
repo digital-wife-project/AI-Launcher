@@ -3,6 +3,8 @@ import re
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 import zipfile
 import sys
+from siui.core import SiGlobal
+
 
 
 class OpeniDownloadWorker(QThread):
@@ -13,18 +15,19 @@ class OpeniDownloadWorker(QThread):
 
     def __init__(self,project_name, repoid, install_arg, savepath):
         super().__init__()
-        if isinstance(install_arg, str):
-            self.file = install_arg
-            self.install_arg = []
-        elif isinstance(install_arg, list):
-            self.file = install_arg[0]
-            self.install_arg = install_arg
         self.project_name=project_name
         self.repoid = repoid
         self.savepath = savepath
         self.running = True
         # 将正则表达式定义移到类级别
         self.regex_percentage = re.compile(r"(\d+)%")
+        if isinstance(install_arg, str):
+            SiGlobal.siui.ThreadList["install"].append(self.project_name)
+            self.file = install_arg
+            self.install_arg = []
+        elif isinstance(install_arg, list):
+            self.file = install_arg[0]
+            self.install_arg = install_arg
 
     def run(self):
         filepath = "openi dataset download"
@@ -51,7 +54,6 @@ class OpeniDownloadWorker(QThread):
         percentage = match_percentage.group(1) if match_percentage else None
         return percentage
     
-    
     def unzip(self,zip_file_path:str,extract_path:str):
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
             # 获取ZIP文件中所有文件的总大小
@@ -70,6 +72,8 @@ class OpeniDownloadWorker(QThread):
             # 发送信号表示解压完成
 
             self.finished_unzipping.emit(self.project_name,(self.savepath+"//"+self.file)[:-4],self.install_arg)
+            if self.install_arg==[]:
+                SiGlobal.siui.ThreadList["install"].remove(self.project_name)
 
 
     def stop(self):

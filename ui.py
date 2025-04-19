@@ -1,4 +1,5 @@
-﻿import icons
+﻿from PyQt5 import QtWidgets
+import icons
 from components.page_about import About
 from components.page_tools import ExampleContainer
 from components.page_homepage import ExampleHomepage
@@ -17,6 +18,9 @@ import siui
 from siui.core import SiColor, SiGlobal
 from siui.templates.application.application import SiliconApplication
 
+from components. pip_installer import GitCloneThread,BatExecutionThread
+from components.pages_project.side_message import send_simple_message
+
 # 载入图标
 siui.core.globals.SiGlobal.siui.loadIcons(
     icons.IconDictionary(color=SiGlobal.siui.colors.fromToken(SiColor.SVG_NORMAL)).icons
@@ -31,8 +35,8 @@ class MySiliconApp(SiliconApplication):
         self.setMinimumSize(1024, 380)
         self.resize(1366, 916)
         self.move((screen_geo.width() - self.width()) // 2, (screen_geo.height() - self.height()) // 2)
-        self.layerMain().setTitle("Silicon UI Gallery")
-        self.setWindowTitle("Silicon UI Gallery")
+        self.layerMain().setTitle("AL All In One AI Launcher")
+        self.setWindowTitle("AL Launcher")
         self.setWindowIcon(QIcon("./img/empty_icon.png"))
 
         self.layerMain().addPage(ExampleHomepage(self),
@@ -74,3 +78,35 @@ class MySiliconApp(SiliconApplication):
 
         SiGlobal.siui.reloadAllWindowsStyleSheet()
 
+        # self.git_clone_thread = GitCloneThread(['','url'], '.', "project_name",'pull')
+        # self.git_clone_thread.outputsignal.connect(lambda output: send_simple_message(1,output,True,1500))
+        # self.git_clone_thread.errorsignal.connect(lambda error,project_path: self.HandleInstallError(error,project_path))
+        # self.git_clone_thread.clone_completed.connect(self.on_clone_thread_finished)  # 连接 finished 信号
+        # self.git_clone_thread.start()  # 启动线程
+
+
+    def closeEvent(self, event):
+        print("进入closeEvent")
+        installing = ''
+        running = ''
+    
+        if SiGlobal.siui.ThreadList["install"]:
+            installing = '正在安装：'
+            for i in SiGlobal.siui.ThreadList["install"]:
+                installing += i + '，'
+    
+        if SiGlobal.siui.ThreadList["running"]:
+            running = '正在运行：'
+            for i in SiGlobal.siui.ThreadList["running"]:
+                running += i + '，'
+    
+        if installing or running:
+            message = f"{installing}\n{running}" if installing and running else installing or running
+            result = QtWidgets.QMessageBox.question(self, "真的要关闭喵？", message, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+            if result == QtWidgets.QMessageBox.Yes:
+                event.accept()
+            else:
+                event.ignore()
+        else:
+            event.accept()
+    

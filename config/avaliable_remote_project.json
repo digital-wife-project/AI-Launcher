@@ -27,7 +27,7 @@
     "GLM-6b": [
       "pip",
       "一个LLM项目",
-      [ "py311.zip", "https://github.moeyy.xyz/https://github.com/THUDM/ChatGLM-6B.git", "./install_script/glm_6b" ]
+      [ "py311.zip", "https://github.com/THUDM/ChatGLM-6B.git", "./install_script/glm_6b" ]
     ]
   },
   "digitalhuman": {

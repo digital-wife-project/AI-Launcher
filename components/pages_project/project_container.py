@@ -1,4 +1,5 @@
-﻿from PyQt5.QtCore import Qt, pyqtSignal
+﻿from socket import SHUT_RD
+from PyQt5.QtCore import Qt, pyqtSignal
 from siui.components import (
     SiDenseHContainer,
     )
@@ -14,7 +15,6 @@ import shutil
 from .project_detail import ChildPage_ProjectDetail
 from .model_windows import ModalDownloadDialog
 from ..openi_download import OpeniDownloadWorker
-from ..launcher import BatRunner
 from ..FolderMover import DeleteFolderThread
 from .DemoLabel import DemoLabel
 from ..pip_installer import GitCloneThread,BatExecutionThread
@@ -103,7 +103,7 @@ class Row_for_each_project(SiDenseHContainer):
             print("使用pip下载")
             self.demo_progress_button_text.setText("部署中")
             self.RefreshSize()   
-            self.git_clone_thread = GitCloneThread(install_arg, user_path, project_name)
+            self.git_clone_thread = GitCloneThread(install_arg, user_path, project_name,'clone')
             self.git_clone_thread.outputsignal.connect(lambda output: send_simple_message(1,output,True,1500))
             self.git_clone_thread.errorsignal.connect(lambda error,project_path: self.HandleInstallError(error,project_path))
             self.git_clone_thread.clone_completed.connect(self.on_clone_thread_finished)  # 连接 finished 信号
@@ -146,8 +146,9 @@ class Row_for_each_project(SiDenseHContainer):
         abs_bat_path = os.path.abspath(install_arg[2])
         shutil.copy(abs_bat_path+"\\install.bat", project_bat_path)
         shutil.copy(abs_bat_path+"\\launch.bat", project_bat_path)
+        shutil.copy("./runner.exe",project_bat_path)
         # 创建并启动线程
-        self.thread = BatExecutionThread(project_bat_path,project_name)
+        self.thread = BatExecutionThread(project_bat_path,project_name,'install')
         self.thread.outputsignal.connect(lambda output: send_simple_message(1,output,True,1500))
         self.thread.pip_finished.connect(self.on_pip_install_thread_finished)
         self.thread.errorsignal.connect(lambda error,project_path: self.HandleInstallError(error,project_path))

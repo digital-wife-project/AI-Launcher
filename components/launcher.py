@@ -1,32 +1,49 @@
-import os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTextEdit
-from PyQt5.QtCore import QObject, QProcess
+from PyQt5.QtCore import QProcess, QObject, pyqtSignal
+from PyQt5.QtWidgets import QApplication
+import sys
 
 class BatRunner(QObject):
-    def __init__(self, bat_file_path):
-        super().__init__()
-        self.bat_file_path = bat_file_path
+    finished = pyqtSignal(int)  # Signal to indicate the process has finished
+    output = pyqtSignal(str)  # Signal to emit console output
 
-        # 创建QProcess对象
+    def __init__(self, parent=None):
+        super(BatRunner, self).__init__(parent)
         self.process = QProcess(self)
-        self.process.readyReadStandardOutput.connect(self.readOutput)
-        self.process.readyReadStandardError.connect(self.readErrors)
+        self.process.readyReadStandardOutput.connect(self.onReadyReadStandardOutput)
+        self.process.readyReadStandardError.connect(self.onReadyReadStandardError)
+        self.process.finished.connect(self.onFinished)
 
-    def runBatFile(self):
-        # 设置工作目录到.bat文件所在的目录
-        bat_directory = os.path.dirname(self.bat_file_path)
-        self.process.setWorkingDirectory(bat_directory)
+    def run_bat(self, bat_file_path, working_directory):
+        """
+        Run a .bat file in the specified working directory.
 
-        # 运行.bat文件
-        self.process.start(self.bat_file_path)
+        :param bat_file_path: The path to the .bat file to run.
+        :param working_directory: The working directory to run the .bat file in.
+        """
+        self.process.setWorkingDirectory(working_directory)
+        self.process.start(bat_file_path)
 
-    def readOutput(self):
-        # 读取标准输出
-        output = self.process.readAllStandardOutput().data().decode('utf-8', errors='replace')
-        print(output)
+    def onReadyReadStandardOutput(self):
+        """
+        Read and emit standard output from the process.
+        """
+        output = self.process.readAllStandardOutput().data().decode()
+        self.output.emit(output)
+        print(output, end='')  # Print output in real-time
 
-    def readErrors(self):
-        # 读取标准错误输
-        errors = self.process.readAllStandardError().data().decode('utf-8', errors='replace')
-        print(errors)
+    def onReadyReadStandardError(self):
+        """
+        Read and emit standard error from the process.
+        """
+        error = self.process.readAllStandardError().data().decode()
+        self.output.emit(error)
+        print(error, end='')  # Print error in real-time
+
+    def onFinished(self, exit_code):
+        """
+        Slot to handle the process finishing.
+
+        :param exit_code: The exit code of the process.
+        """
+        self.finished.emit(exit_code)
 
