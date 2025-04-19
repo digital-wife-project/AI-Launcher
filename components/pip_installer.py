@@ -58,9 +58,9 @@ class BatExecutionThread(QThread):
     errorsignal = pyqtSignal(str,str)
     pip_finished = pyqtSignal(str, str)  # 假设信号需要传递这些参数
 
-    def __init__(self, clonedir, project_name,operation):
+    def __init__(self, running_path, project_name,operation):
         super(BatExecutionThread, self).__init__()
-        self.clonedir = clonedir
+        self.running_path = running_path
         self.operation=operation
         self.project_name = project_name
 
@@ -68,29 +68,29 @@ class BatExecutionThread(QThread):
         try:
             print("开始运行bat...")
             self.outputsignal.emit("开始运行...")
-            install_bat_path = os.path.join(self.clonedir, "runner.exe")
-            print(install_bat_path)
+            runner_path = os.path.join(self.running_path, "runner.exe")
+            print(runner_path)
             if self.operation=="install":
                 # 使用subprocess.Popen来实时获取输出
-                result = subprocess.run([install_bat_path,'--install'], check=True, capture_output=True, text=True)
+                result = subprocess.run([runner_path,'--install'], check=True, capture_output=True, text=True)
                 if result.returncode == 0:
-                    self.outputsignal.emit(f"安装完成，目录: {self.clonedir}")
+                    self.outputsignal.emit(f"安装完成，目录: {self.running_path}")
                     print("运行完成")
-                    self.pip_finished.emit(self.clonedir, self.project_name)  # 发送克隆完成信号
+                    self.pip_finished.emit(self.running_path, self.project_name)  # 发送克隆完成信号
                 SiGlobal.siui.ThreadList["install"].remove(self.project_name)
 
             elif self.operation=="launch":
-                SiGlobal.siui.ThreadList["launch"].append(self.project_name)
-                result = subprocess.run([install_bat_path,'--install'], check=True, capture_output=True, text=True)
+                SiGlobal.siui.ThreadList["running"].append(self.project_name)
+                result = subprocess.run([runner_path,'--launch'], check=True, capture_output=True, text=True)
                 self.outputsignal.emit("启动完成")
                 self.outputsignal.emit(f"{self.project_name}运行退出")
-                SiGlobal.siui.ThreadList["launch"].remove(self.project_name)
+                SiGlobal.siui.ThreadList["running"].remove(self.project_name)
 
         except subprocess.CalledProcessError as e:
             # 处理错误情况
             error_message = f"运行失败: {e}"
             print(error_message)
-            self.errorsignal.emit(error_message,self.clonedir)
+            self.errorsignal.emit(error_message,self.running_path)
         finally:
             # 退出线程
             self.quit()

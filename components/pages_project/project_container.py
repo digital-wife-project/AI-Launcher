@@ -63,8 +63,15 @@ class Row_for_each_project(SiDenseHContainer):
 
     def launch_click(self):
         self.demo_progress_button_text.setText("正在运行")
-        self.launcher = BatRunner(f"{self.project_path}/launch.bat")
-        self.launcher.runBatFile()
+        # self.launcher = BatRunner(f"{self.project_path}/launch.bat")
+        # self.launcher.runBatFile()
+        self.launcher = BatExecutionThread(self.project_path,self.project_name,'launch')
+        self.launcher.outputsignal.connect(lambda output: send_simple_message(1,output,True,1500))
+        self.launcher.pip_finished.connect(self.on_pip_install_thread_finished)
+        self.launcher.errorsignal.connect(lambda error,project_path: self.HandleInstallError(error,project_path))
+        # 连接 finished 信号
+        self.launcher.start()
+
 
     def RefreshText(self):
         self.project_path=loacl_project_json_reader(self.project_name)
