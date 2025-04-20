@@ -1,4 +1,4 @@
-﻿rem overriding default python env vars in order not to interfere with any system python installation
+閿樼腑em overriding default python env vars in order not to interfere with any system python installation
 set "scriptPath=%~dp0"
 cd /d "%scriptPath%"
 set PYTHON_PATH=.\py311\

@@ -1,4 +1,4 @@
-﻿from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal
 from siui.components import (
     SiLabel,
     )

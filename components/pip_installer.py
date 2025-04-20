@@ -13,7 +13,7 @@ class GitCloneThread(QThread):
 
     def __init__(self, install_args, user_path, project_name,operation):
         super(GitCloneThread, self).__init__()
-        self.gitpath = "git.exe"
+        self.gitpath = "./PortableGit/bin/git.exe"
         self.operation=operation
         print(os.path.abspath(self.gitpath))
         self.repourl = install_args[1]

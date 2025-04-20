@@ -1,4 +1,4 @@
-﻿from PyQt5.QtCore import QProcess, QObject, pyqtSignal
+from PyQt5.QtCore import QProcess, QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 import sys
 

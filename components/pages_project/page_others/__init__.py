@@ -1,1 +1,1 @@
-﻿from .page_others import others
+from .page_others import others

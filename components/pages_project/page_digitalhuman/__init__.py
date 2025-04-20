@@ -1,1 +1,1 @@
-﻿from .page_digitalhuman import digitalhuman
+from .page_digitalhuman import digitalhuman

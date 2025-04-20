@@ -1,0 +1,101 @@
+{
+ "version": "auto-py-to-exe-configuration_v1",
+ "pyinstallerOptions": [
+  {
+   "optionDest": "noconfirm",
+   "value": true
+  },
+  {
+   "optionDest": "filenames",
+   "value": "D:/AI-Launcher/start.py"
+  },
+  {
+   "optionDest": "onefile",
+   "value": false
+  },
+  {
+   "optionDest": "console",
+   "value": true
+  },
+  {
+   "optionDest": "clean_build",
+   "value": true
+  },
+  {
+   "optionDest": "debug",
+   "value": "all"
+  },
+  {
+   "optionDest": "strip",
+   "value": false
+  },
+  {
+   "optionDest": "noupx",
+   "value": false
+  },
+  {
+   "optionDest": "disable_windowed_traceback",
+   "value": false
+  },
+  {
+   "optionDest": "uac_admin",
+   "value": false
+  },
+  {
+   "optionDest": "uac_uiaccess",
+   "value": false
+  },
+  {
+   "optionDest": "argv_emulation",
+   "value": false
+  },
+  {
+   "optionDest": "bootloader_ignore_signals",
+   "value": false
+  },
+  {
+   "optionDest": "collect_submodules",
+   "value": "siui.components.page"
+  },
+  {
+   "optionDest": "collect_all",
+   "value": "siui.gui.icons"
+  },
+  {
+   "optionDest": "collect_submodules",
+   "value": "components"
+  },
+  {
+   "optionDest": "collect_submodules",
+   "value": "ui"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "components"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "ui"
+  },
+  {
+   "optionDest": "pathex",
+   "value": "D:/AI-Launcher"
+  },
+  {
+   "optionDest": "hiddenimports",
+   "value": "icons"
+  },
+  {
+   "optionDest": "collect_submodules",
+   "value": "icons"
+  },
+  {
+   "optionDest": "datas",
+   "value": "D:/AI-Launcher/icons/icons.dat;icons/"
+  }
+ ],
+ "nonPyinstallerOptions": {
+  "increaseRecursionLimit": true,
+  "manualArguments": ""
+ }
+}
