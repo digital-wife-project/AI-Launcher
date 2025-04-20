@@ -2,7 +2,7 @@
 import re
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 import zipfile
-import sys
+import os
 from siui.core import SiGlobal
 
 
@@ -30,18 +30,18 @@ class OpeniDownloadWorker(QThread):
             self.install_arg = install_arg
 
     def run(self):
-        filepath = "openi dataset download"
-        arguments = f" {self.repoid} {self.file} --cluster NPU --save_path ./tmp/"
-        command = f"{filepath} {arguments}"
-        print(command)
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, encoding='utf-8',errors='replace')
-
-        for line in iter(process.stdout.readline, ''):
-            if not self.running:
-                break
-            percentage = self.attackdetail(line)
-            if percentage:
-                self.presentage_updated.emit(int(percentage))
+        if not (self.check_file_exists(f"./tmp/{self.file}")):
+            filepath = "openi_download"
+            arguments = f" --repo_id {self.repoid} --file {self.file} --save_path ./tmp/"
+            command = f"{filepath} {arguments}"
+            print(command)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, encoding='utf-8',errors='replace')
+            for line in iter(process.stdout.readline, ''):
+                if not self.running:
+                    break
+                percentage = self.attackdetail(line)
+                if percentage:
+                    self.presentage_updated.emit(int(percentage))
 
         self.on_download_finished.emit()
         self.unzip(f"./tmp/{self.file}",self.savepath)
@@ -75,6 +75,15 @@ class OpeniDownloadWorker(QThread):
             if self.install_arg==[]:
                 SiGlobal.siui.ThreadList["install"].remove(self.project_name)
 
+    def check_file_exists(self,file_path):
+        # 检查路径是否存在
+        if os.path.exists(file_path):
+            # 检查是否为文件
+            if os.path.isfile(file_path):
+                return True
+        else:
+            return False
+    
 
     def stop(self):
         self.running = False

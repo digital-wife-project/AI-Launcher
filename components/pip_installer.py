@@ -5,16 +5,20 @@ import subprocess
 
 from siui.core import SiGlobal
 
+import subprocess
+import os
+from PyQt5.QtCore import QThread, pyqtSignal
+
 class GitCloneThread(QThread):
     # 定义信号，用于发送输出和错误信息
     outputsignal = pyqtSignal(str)
     errorsignal = pyqtSignal(str,str)
     clone_completed = pyqtSignal(str, str, list)  # 新增信号，用于通知克隆完成
 
-    def __init__(self, install_args, user_path, project_name,operation):
+    def __init__(self, install_args, user_path, project_name, operation):
         super(GitCloneThread, self).__init__()
         self.gitpath = "./PortableGit/bin/git.exe"
-        self.operation=operation
+        self.operation = operation
         print(os.path.abspath(self.gitpath))
         self.repourl = install_args[1]
         self.clonedir = os.path.join(user_path, project_name)  # 使用os.path.join来拼接路径
@@ -22,15 +26,20 @@ class GitCloneThread(QThread):
         self.install_args = install_args
         SiGlobal.siui.ThreadList["install"].append(self.project_name)
 
-
     def run(self):
         try:
             print("开始克隆仓库...")
             self.outputsignal.emit("开始克隆仓库...")
-            
+
+            # 设置启动信息，隐藏命令行窗口
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+
             # 使用Popen来实时获取输出
             proc = subprocess.Popen([self.gitpath, self.operation, self.repourl, self.clonedir],
-                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1,
+                                    startupinfo=startupinfo)
             # 实时读取输出
             while True:
                 line = proc.stdout.readline()
@@ -42,12 +51,11 @@ class GitCloneThread(QThread):
             # 检查是否有错误发生
             if proc.returncode != 0:
                 raise subprocess.CalledProcessError(proc.returncode, proc.args, output=proc.stdout.read())
-            print("克隆完成")
             self.outputsignal.emit(f"克隆完成，目录: {self.clonedir}")
             self.clone_completed.emit(self.clonedir, self.project_name, self.install_args)  # 发送克隆完成信号
 
         except subprocess.CalledProcessError as e:
-            self.errorsignal.emit(e.output,self.clonedir)  # 发射错误信息
+            self.errorsignal.emit(e.output, self.clonedir)  # 发射错误信息
         finally:
             # 退出线程
             self.quit()

@@ -15,15 +15,11 @@
   },
   {
    "optionDest": "console",
-   "value": true
+   "value": false
   },
   {
    "optionDest": "clean_build",
    "value": true
-  },
-  {
-   "optionDest": "debug",
-   "value": "all"
   },
   {
    "optionDest": "strip",
