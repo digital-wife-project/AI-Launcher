@@ -31,15 +31,13 @@ def remote_project_json_reader():
         return None
 
 def update_json():
-    version=requests.get('http://127.0.0.1/version')
+    version=requests.get('http://127.0.0.1:19257/version')
     if version!=remote_project_json_reader():
-        new_json=requests.get('https://127.0.0.1/config')
+        new_json=requests.get('https://127.0.0.1:19257/config')
         json_file_path="./config/avaliable_remote_project.json"
         file=open(json_file_path,"w")
         file.write(new_json.json())
         file.close()
-
-
 
 def show_version_message(window):
     window.LayerRightMessageSidebar().send(
@@ -66,6 +64,10 @@ def show_version_message(window):
 
 
 if __name__ == "__main__":
+    try:
+        update_json()
+    except Exception as e:
+        pass
     app = QApplication(sys.argv)
     # if not is_admin():
     #     restart_as_admin()

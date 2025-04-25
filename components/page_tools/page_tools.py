@@ -47,17 +47,10 @@ class ExampleContainer(SiPage):
         with self.titled_widgets_group as group:
             # 竖直密堆积容器
             self.dense_v_container = OptionCardPlaneForWidgetDemos(self)
-            self.dense_v_container.setSourceCodeURL("https://github.com/ChinaIceF/PyQt-SiliconUI/blob/main/siui/components"
-                                                    "/widgets/progress_bar/progress_bar.py")
-            self.dense_v_container.setTitle("竖直密堆积容器")
+            self.dense_v_container.setTitle("敬请期待")
 
             self.demo_dense_v_container = SiDenseVContainer(self)
             self.demo_dense_v_container.setFixedHeight(300)
-            self.demo_dense_v_container.addWidget(DemoLabel(self, "顶侧A"), "top")
-            self.demo_dense_v_container.addWidget(DemoLabel(self, "顶侧B"), "top")
-            self.demo_dense_v_container.addWidget(DemoLabel(self, "..."), "top")
-            self.demo_dense_v_container.addWidget(DemoLabel(self, "底侧A"), "bottom")
-            self.demo_dense_v_container.addWidget(DemoLabel(self, "底侧B"), "bottom")
             self.demo_dense_v_container.addWidget(DemoLabel(self, "..."), "bottom")
 
             self.dense_v_container.body().addWidget(self.demo_dense_v_container)

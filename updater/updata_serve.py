@@ -4,7 +4,7 @@ app = FastAPI()
 
 @app.get("/version")
 def remote_project_json_reader():
-    json_file_path="./config/avaliable_remote_project.json"
+    json_file_path="./data.json"
     with open(json_file_path, 'r', encoding='utf-8-sig') as file:
         data = json.load(file)
     if data["version"]:

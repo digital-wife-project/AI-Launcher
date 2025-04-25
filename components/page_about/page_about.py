@@ -53,12 +53,12 @@ class About(SiPage):
 
             self.button_to_update = SiSimpleButton(self)
             self.button_to_update.resize(32, 32)
-            self.button_to_update.attachment().load(SiGlobal.siui.iconpack.get("ic_fluent_open_regular"))
+            self.button_to_update.attachment().load(SiGlobal.siui.iconpack.get("ic_fluent_box_arrow_up_filled"))
             self.button_to_update.clicked.connect(lambda: self.update())
 
             self.button_to_repo = SiSimpleButton(self)
             self.button_to_repo.resize(32, 32)
-            self.button_to_repo.attachment().load(SiGlobal.siui.iconpack.get("ic_fluent_box_arrow_up_filled"))
+            self.button_to_repo.attachment().load(SiGlobal.siui.iconpack.get("ic_fluent_open_regular"))
             self.button_to_repo.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://gitee.com/wyyyz19373765497/AI-Launcher")))
 
             self.option_card_update = SiOptionCardLinear(self)
@@ -104,5 +104,5 @@ class About(SiPage):
         self.setAttachment(self.titled_widget_group)
 
     def update(self):
-        # process = subprocess.Popen('./updater.exe')
+        process = subprocess.Popen('./updater.exe')
         SiGlobal.siui.windows["MAIN_WINDOW"].close()

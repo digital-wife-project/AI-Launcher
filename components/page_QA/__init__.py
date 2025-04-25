@@ -1,1 +1,1 @@
-from .page_widgets import ExampleWidgets
+from .page_QA import ExampleContainer

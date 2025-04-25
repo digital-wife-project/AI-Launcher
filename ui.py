@@ -10,7 +10,7 @@ from components.pages_project.page_TTS import TTS
 from components.pages_project.page_others import others
 from components.pages_project.page_SD import SD
 
-from components.page_QA import ExampleWidgets
+from components.page_QA import ExampleContainer
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDesktopWidget
 
@@ -63,7 +63,7 @@ class MySiliconApp(SiliconApplication):
                                  icon=SiGlobal.siui.iconpack.get("ic_fluent_desktop_arrow_down_filled"),
                                  hint="其他", side="top")
 
-        self.layerMain().addPage(ExampleWidgets(self),
+        self.layerMain().addPage(ExampleContainer(self),
                                  icon=SiGlobal.siui.iconpack.get("ic_fluent_question_filled"),
                                  hint="疑难解答", side="top")
         self.layerMain().addPage(ExampleContainer(self),
