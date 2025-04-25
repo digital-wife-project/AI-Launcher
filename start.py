@@ -3,9 +3,10 @@ import sys
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
 from ui import MySiliconApp
-
+import requests
 import siui
 from siui.core import SiGlobal
+import json
 
 import ctypes
 
@@ -19,6 +20,25 @@ def restart_as_admin():
     if not is_admin():
         # Re-run the program with admin rights
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+
+def remote_project_json_reader():
+    json_file_path="./config/avaliable_remote_project.json"
+    with open(json_file_path, 'r', encoding='utf-8-sig') as file:
+        data = json.load(file)
+    if data["version"]:
+        return data["version"]
+    else:
+        return None
+
+def update_json():
+    version=requests.get('http://127.0.0.1/version')
+    if version!=remote_project_json_reader():
+        new_json=requests.get('https://127.0.0.1/config')
+        json_file_path="./config/avaliable_remote_project.json"
+        file=open(json_file_path,"w")
+        file.write(new_json.json())
+        file.close()
+
 
 
 def show_version_message(window):

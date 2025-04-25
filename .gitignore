@@ -6,6 +6,7 @@
 /temp
 /tmp
 /build
+/config
 /dist
 # User-specific files
 *.rsuser

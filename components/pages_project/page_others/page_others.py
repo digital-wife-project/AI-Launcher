@@ -30,7 +30,7 @@ class others(SiPage):
         with self.titled_widgets_group as group:
             # 竖直密堆积容器
             self.dense_v_container = OptionCardPlaneForWidgetDemos(self)
-            self.dense_v_container.setTitle("竖直密堆积容器")
+            self.dense_v_container.setTitle("其他")
 
             self.demo_dense_v_container = SiDenseVContainer(self)
             self.push_buttons = OptionCardPlaneForWidgetDemos(self)

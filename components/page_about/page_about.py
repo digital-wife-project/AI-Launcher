@@ -1,3 +1,4 @@
+﻿import subprocess
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QSizePolicy
@@ -50,10 +51,20 @@ class About(SiPage):
         with self.titled_widget_group as group:
             group.addTitle("开源")
 
+            self.button_to_update = SiSimpleButton(self)
+            self.button_to_update.resize(32, 32)
+            self.button_to_update.attachment().load(SiGlobal.siui.iconpack.get("ic_fluent_open_regular"))
+            self.button_to_update.clicked.connect(lambda: self.update())
+
             self.button_to_repo = SiSimpleButton(self)
             self.button_to_repo.resize(32, 32)
-            self.button_to_repo.attachment().load(SiGlobal.siui.iconpack.get("ic_fluent_open_regular"))
-            self.button_to_repo.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://github.com/ChinaIceF/PyQt-SiliconUI")))
+            self.button_to_repo.attachment().load(SiGlobal.siui.iconpack.get("ic_fluent_box_arrow_up_filled"))
+            self.button_to_repo.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://gitee.com/wyyyz19373765497/AI-Launcher")))
+
+            self.option_card_update = SiOptionCardLinear(self)
+            self.option_card_update.setTitle("检查更新", "检查AL-laucher的最新版本")
+            self.option_card_update.load(SiGlobal.siui.iconpack.get("ic_fluent_box_arrow_up_filled"))
+            self.option_card_update.addWidget(self.button_to_update)
 
             self.option_card_repo = SiOptionCardLinear(self)
             self.option_card_repo.setTitle("开源仓库", "在 GitHub 上查看 AI-laucher 的项目主页")
@@ -66,6 +77,7 @@ class About(SiPage):
 
             group.addWidget(self.option_card_repo)
             group.addWidget(self.option_card_license)
+            group.addWidget(self.option_card_update)
 
         with self.titled_widget_group as group:
             group.addTitle("版权")
@@ -90,3 +102,7 @@ class About(SiPage):
 
         # Set SiTitledWidgetGroup object as the attachment of the page's scroll area
         self.setAttachment(self.titled_widget_group)
+
+    def update(self):
+        # process = subprocess.Popen('./updater.exe')
+        SiGlobal.siui.windows["MAIN_WINDOW"].close()
