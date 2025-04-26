@@ -1,3 +1,5 @@
+#AL-Launcher
+#Digital Wife Project Team
 import sys
 
 from PyQt5.QtCore import QTimer
