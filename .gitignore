@@ -6,7 +6,7 @@
 /temp
 /tmp
 /build
-/config
+/config/local_project.json
 /dist
 # User-specific files
 *.rsuser

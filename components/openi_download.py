@@ -42,12 +42,12 @@ class OpeniDownloadWorker(QThread):
                 percentage = self.attackdetail(line)
                 if percentage:
                     self.presentage_updated.emit(int(percentage))
+            process.stdout.close()
+            process.wait()
 
         self.on_download_finished.emit()
         self.unzip(f"./tmp/{self.file}",self.savepath)
 
-        process.stdout.close()
-        process.wait()
 
     def attackdetail(self, line):
         match_percentage = self.regex_percentage.search(line)
@@ -74,6 +74,7 @@ class OpeniDownloadWorker(QThread):
             self.finished_unzipping.emit(self.project_name,(self.savepath+"//"+self.file)[:-4],self.install_arg)
             if self.install_arg==[]:
                 SiGlobal.siui.ThreadList["install"].remove(self.project_name)
+            self.quit()
 
     def check_file_exists(self,file_path):
         # 检查路径是否存在
@@ -87,4 +88,3 @@ class OpeniDownloadWorker(QThread):
 
     def stop(self):
         self.running = False
-

@@ -1,7 +1,7 @@
 ﻿from PyQt5 import QtWidgets
 import icons
 from components.page_about import About
-from components.page_tools import ExampleContainer
+from components.page_tools import tools
 from components.page_homepage import ExampleHomepage
 
 from components.pages_project.page_digitalhuman import digitalhuman
@@ -10,7 +10,7 @@ from components.pages_project.page_TTS import TTS
 from components.pages_project.page_others import others
 from components.pages_project.page_SD import SD
 
-from components.page_QA import ExampleContainer
+from components.page_QA import QA
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDesktopWidget
 
@@ -18,7 +18,6 @@ import siui
 from siui.core import SiColor, SiGlobal
 from siui.templates.application.application import SiliconApplication
 
-from components. pip_installer import GitCloneThread,BatExecutionThread
 from components.pages_project.side_message import send_simple_message
 
 # 载入图标
@@ -63,10 +62,10 @@ class MySiliconApp(SiliconApplication):
                                  icon=SiGlobal.siui.iconpack.get("ic_fluent_desktop_arrow_down_filled"),
                                  hint="其他", side="top")
 
-        self.layerMain().addPage(ExampleContainer(self),
+        self.layerMain().addPage(QA(self),
                                  icon=SiGlobal.siui.iconpack.get("ic_fluent_question_filled"),
                                  hint="疑难解答", side="top")
-        self.layerMain().addPage(ExampleContainer(self),
+        self.layerMain().addPage(tools(self),
                                  icon=SiGlobal.siui.iconpack.get("ic_fluent_toolbox_regular"),
                                  hint="工具箱", side="top")
 
@@ -77,12 +76,6 @@ class MySiliconApp(SiliconApplication):
         self.layerMain().setPage(0)
 
         SiGlobal.siui.reloadAllWindowsStyleSheet()
-
-        # self.git_clone_thread = GitCloneThread(['','url'], '.', "project_name",'pull')
-        # self.git_clone_thread.outputsignal.connect(lambda output: send_simple_message(1,output,True,1500))
-        # self.git_clone_thread.errorsignal.connect(lambda error,project_path: self.HandleInstallError(error,project_path))
-        # self.git_clone_thread.clone_completed.connect(self.on_clone_thread_finished)  # 连接 finished 信号
-        # self.git_clone_thread.start()  # 启动线程
 
 
     def closeEvent(self, event):

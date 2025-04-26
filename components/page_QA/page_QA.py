@@ -30,7 +30,7 @@ class DemoLabel(SiLabel):
                            f"background-color: {self.getColor(SiColor.INTERFACE_BG_D)}")
 
 
-class ExampleContainer(SiPage):
+class QA(SiPage):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.message_type = 0

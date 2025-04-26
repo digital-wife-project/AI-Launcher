@@ -91,10 +91,22 @@ class About(SiPage):
         with self.titled_widget_group as group:
             group.addTitle("第三方资源")
 
+            self.button_to_repo2 = SiSimpleButton(self)
+            self.button_to_repo2.resize(32, 32)
+            self.button_to_repo2.attachment().load(SiGlobal.siui.iconpack.get("ic_fluent_open_regular"))
+            self.button_to_repo2.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://github.com/ChinaIceF/PyQt-SiliconUI")))
+
+
             self.option_card_icon_pack = SiOptionCardLinear(self)
             self.option_card_icon_pack.setTitle("Fluent UI 图标库", "本项目内置了 Fluent UI 图标库，Microsoft 公司保有这些图标的版权")
             self.option_card_icon_pack.load(SiGlobal.siui.iconpack.get("ic_fluent_diversity_regular"))
 
+            self.option_card_icon_pack1 = SiOptionCardLinear(self)
+            self.option_card_icon_pack1.setTitle("PyQt-SiliconUI", "本项目使用了 PyQt-SiliconUI，其原作者保留了版权")
+            self.option_card_icon_pack1.load(SiGlobal.siui.iconpack.get("ic_fluent_diversity_regular"))
+            self.option_card_icon_pack1.addWidget(self.button_to_repo2)
+
+            group.addWidget(self.option_card_icon_pack1)
             group.addWidget(self.option_card_icon_pack)
 
         # add placeholder for better outfit

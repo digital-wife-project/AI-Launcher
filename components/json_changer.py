@@ -1,4 +1,5 @@
 ﻿import json
+import os
 
 def json_adder(project_name:str,project_path:str):
     json_file_path = "./config/local_project.json"
@@ -20,14 +21,16 @@ def json_adder(project_name:str,project_path:str):
 def loacl_project_json_reader(project_name: str):
     # 读取现有的JSON文件内容
     json_filepath = "./config/local_project.json"
+    if not os.path.exists(json_filepath):
+        # 如果文件不存在，创建一个新文件
+        with open(json_filepath, 'w', encoding='utf-8-sig') as file:
+            json.dump({}, file, ensure_ascii=False, indent=4)
     try:
         with open(json_filepath, 'r', encoding='utf-8-sig') as file:
             # 将JSON数据加载到字典中
             data = json.load(file)
             # 使用get方法安全地获取project_name的值，如果不存在则返回None
             return data.get(project_name)
-    except FileNotFoundError:
-        print(f"文件 {json_filepath} 未找到。")
     except json.JSONDecodeError:
         print(f"文件 {json_filepath} 不是有效的JSON格式。")
     except Exception as e:

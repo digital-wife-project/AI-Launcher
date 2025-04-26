@@ -1,1 +1,1 @@
-from .page_QA import ExampleContainer
+from .page_QA import QA

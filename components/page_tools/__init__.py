@@ -1,1 +1,1 @@
-from .page_tools import ExampleContainer
+from .page_tools import tools

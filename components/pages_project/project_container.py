@@ -70,7 +70,6 @@ class Row_for_each_project(SiDenseHContainer):
         # 连接 finished 信号
         self.launcher.start()
 
-
     def RefreshText(self):
         self.project_path=loacl_project_json_reader(self.project_name)
         if self.project_path !=None:
@@ -99,7 +98,7 @@ class Row_for_each_project(SiDenseHContainer):
         self.demo_progress_button_text.setText("正在下载")
         if self.insatller=="openi":
             print("使用openi下载")
-            self.download_worker = OpeniDownloadWorker(project_name,"wyyyz/dig",install_arg,user_path)
+            self.download_worker = OpeniDownloadWorker(project_name,install_arg[0],install_arg[1],user_path)
             self.download_worker.presentage_updated.connect(self.presentage_updated)
             self.download_worker.on_download_finished.connect(self.download_finished)
             self.download_worker.finished_unzipping.connect(self.OpeniunzipFinished)
