@@ -3,14 +3,13 @@ import json
 app = FastAPI()
 
 @app.get("/version")
-def remote_project_json_reader():
-    json_file_path="./data.json"
-    with open(json_file_path, 'r', encoding='utf-8-sig') as file:
+async def read_json_file_version():
+    # 读取 JSON 文件
+    with open("./data.json", "r") as file:
         data = json.load(file)
-    if data["version"]:
-        return data["version"]
-    else:
-        return None
+    version=data.get("version")
+    # 返回 JSON 响应
+    return version
 
 @app.get("/config")
 async def read_json_file():

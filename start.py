@@ -33,7 +33,7 @@ def remote_project_json_reader():
 def update_json():
     version=requests.get('http://127.0.0.1:19257/version')
     if version!=remote_project_json_reader():
-        new_json=requests.get('https://127.0.0.1:19257/config')
+        new_json=requests.get('http://127.0.0.1:19257/config')
         json_file_path="./config/avaliable_remote_project.json"
         file=open(json_file_path,"w")
         file.write(new_json.json())
