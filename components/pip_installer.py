@@ -74,13 +74,18 @@ class BatExecutionThread(QThread):
 
     def run(self):
         try:
+
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+
             print("开始运行bat...")
             self.outputsignal.emit("开始运行...")
             runner_path = os.path.join(self.running_path, "runner.exe")
             print(runner_path)
             if self.operation=="install":
                 # 使用subprocess.Popen来实时获取输出
-                result = subprocess.run([runner_path,'--install'], check=True, capture_output=True, text=True)
+                result = subprocess.run([runner_path,'--install'], check=True, capture_output=True, text=True,strartupinfo=startupinfo)
                 if result.returncode == 0:
                     self.outputsignal.emit(f"安装完成，目录: {self.running_path}")
                     print("运行完成")
@@ -89,7 +94,7 @@ class BatExecutionThread(QThread):
 
             elif self.operation=="launch":
                 SiGlobal.siui.ThreadList["running"].append(self.project_name)
-                result = subprocess.run([runner_path,'--launch'], check=True, capture_output=True, text=True)
+                result = subprocess.run([runner_path,'--launch'], check=True, capture_output=True, text=True,strartupinfo=startupinfo)
                 self.outputsignal.emit("启动完成")
                 self.outputsignal.emit(f"{self.project_name}运行退出")
                 SiGlobal.siui.ThreadList["running"].remove(self.project_name)

@@ -30,12 +30,25 @@ class OpeniDownloadWorker(QThread):
             self.install_arg = install_arg
 
     def run(self):
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = subprocess.SW_HIDE
+
         if not (self.check_file_exists(f"./tmp/{self.file}")):
             filepath = "openi_download"
             arguments = f" --repo_id {self.repoid} --file {self.file} --save_path ./tmp/"
             command = f"{filepath} {arguments}"
             print(command)
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, encoding='utf-8',errors='replace')
+            process = subprocess.Popen(
+                command,
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.STDOUT, 
+                text=True, 
+                bufsize=1, 
+                encoding='utf-8',
+                errors='replace', 
+                startupinfo=startupinfo, 
+                shell=True)
             for line in iter(process.stdout.readline, ''):
                 if not self.running:
                     break
