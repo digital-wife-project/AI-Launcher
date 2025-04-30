@@ -8,6 +8,7 @@
 /build
 /config/local_project.json
 /dist
+/project
 # User-specific files
 *.rsuser
 *.suo

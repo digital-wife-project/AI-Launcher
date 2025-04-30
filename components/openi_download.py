@@ -30,35 +30,42 @@ class OpeniDownloadWorker(QThread):
             self.install_arg = install_arg
 
     def run(self):
+        # 创建一个STARTUPINFO对象，用于设置子进程的启动信息
         startupinfo = subprocess.STARTUPINFO()
+        # 设置子进程的启动标志，使其不显示窗口
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         startupinfo.wShowWindow = subprocess.SW_HIDE
 
+        # 检查文件是否存在
         if not (self.check_file_exists(f"./tmp/{self.file}")):
+            # 设置下载文件的路径
             filepath = "openi_download"
+            # 设置下载文件的参数
             arguments = f" --repo_id {self.repoid} --file {self.file} --save_path ./tmp/"
+            # 拼接下载命令
             command = f"{filepath} {arguments}"
+            # 打印下载命令
             print(command)
-            process = subprocess.Popen(
-                command,
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.STDOUT, 
-                text=True, 
-                bufsize=1, 
-                encoding='utf-8',
-                errors='replace', 
-                startupinfo=startupinfo, 
-                shell=True)
+            # 执行下载命令
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, encoding='utf-8',errors='replace',startupinfo=startupinfo)
+            # 逐行读取下载进度
             for line in iter(process.stdout.readline, ''):
+                # 如果下载停止，则退出循环
                 if not self.running:
                     break
+                # 获取下载进度
                 percentage = self.attackdetail(line)
+                # 如果获取到进度，则发射信号
                 if percentage:
                     self.presentage_updated.emit(int(percentage))
+            # 关闭子进程的输出流
             process.stdout.close()
+            # 等待子进程结束
             process.wait()
 
+        # 发射下载完成信号
         self.on_download_finished.emit()
+        # 解压下载的文件
         self.unzip(f"./tmp/{self.file}",self.savepath)
 
 
