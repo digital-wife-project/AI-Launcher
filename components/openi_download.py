@@ -1,4 +1,5 @@
-﻿import subprocess
+﻿from doctest import REPORT_CDIFF
+import subprocess
 import re
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 import zipfile
@@ -39,28 +40,22 @@ class OpeniDownloadWorker(QThread):
         # 检查文件是否存在
         if not (self.check_file_exists(f"./tmp/{self.file}")):
             # 设置下载文件的路径
-            filepath = "openi_download"
-            # 设置下载文件的参数
-            arguments = f" --repo_id {self.repoid} --file {self.file} --save_path ./tmp/"
-            # 拼接下载命令
-            command = f"{filepath} {arguments}"
-            # 打印下载命令
-            print(command)
-            # 执行下载命令
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, encoding='utf-8',errors='replace',startupinfo=startupinfo)
-            # 逐行读取下载进度
-            for line in iter(process.stdout.readline, ''):
-                # 如果下载停止，则退出循环
-                if not self.running:
+            exe_path = './openi_download.exe'
+            repoid = ['--repo_id',f'{self.repoid}']  # 这是要传递给exe程序的参数
+            file= ['--file',f'{self.file}']
+            savepath = ['--save_path','./tmp']
+            # 使用subprocess.Popen来启动程序
+            process = subprocess.Popen([exe_path]+repoid+file+savepath, startupinfo=startupinfo, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            # 实时捕获输出
+            while True:
+                output = process.stdout.readline()
+                if output == '' and process.poll() is not None:
                     break
-                # 获取下载进度
-                percentage = self.attackdetail(line)
-                # 如果获取到进度，则发射信号
-                if percentage:
-                    self.presentage_updated.emit(int(percentage))
-            # 关闭子进程的输出流
-            process.stdout.close()
-            # 等待子进程结束
+                if output:
+                    # 解析输出中的百分比
+                    percentage = self.attackdetail(output)
+                    if percentage:
+                        self.presentage_updated.emit(int(percentage))
             process.wait()
 
         # 发射下载完成信号
