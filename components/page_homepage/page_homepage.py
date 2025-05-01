@@ -78,7 +78,7 @@ class ExampleHomepage(SiPage):
         self.option_card_project.setThemeColor("#855198")
         self.option_card_project.setDescription(
             "check All AI laucher on GitHub to get the latest release, report errors, provide suggestions and more.")  # noqa: E501
-        self.option_card_project.setURL("https://github.com")
+        self.option_card_project.setURL("https://gitee.com/wyyyz19373765497/AI-Launcher")
 
         self.option_card_example = ThemedOptionCardPlane(self)
         self.option_card_example.setTitle("Examples")
