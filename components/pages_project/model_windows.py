@@ -32,7 +32,7 @@ class ModalDownloadDialog(SiModalDialog):
         self.label.setText(
             f'<span style="color: {self.getColor(SiColor.TEXT_B)}">选择项目的安装位置</span><br>'
             f'<span style="color: {self.getColor(SiColor.TEXT_B)}">当前安装位置{self.user_path}</span><br>'
-
+            f'<span style="color: {self.getColor(SiColor.TEXT_B)}">这会移除您所选文件夹中的文件</span><br>'
         )
         self.label.adjustSize()
         self.contentContainer().addWidget(self.label)
@@ -76,5 +76,6 @@ class ModalDownloadDialog(SiModalDialog):
                 self.label.setText(
                     f'<span style="color: {self.getColor(SiColor.TEXT_B)}">选择项目的安装位置</span><br>'
                     f'<span style="color: {self.getColor(SiColor.TEXT_B)}">当前安装位置{self.user_path}</span><br>'
+
                     )
                 self.button3.setEnabled(True)

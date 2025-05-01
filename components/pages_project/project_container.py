@@ -161,6 +161,7 @@ class Row_for_each_project(SiDenseHContainer):
         self.thread.start()
 
     def HandleInstallError(self, error,project_path):
+        print(f"克隆失败: {error}")
         send_simple_message(4,error,False,1500)
         self.demo_progress_button_text.setText("安装失败")
         self.RefreshSize()

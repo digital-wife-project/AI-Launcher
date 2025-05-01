@@ -4,7 +4,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import subprocess
 
 from siui.core import SiGlobal
-
+from .FolderMover import DeleteFolderThread
 import subprocess
 import os
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -12,7 +12,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 class GitCloneThread(QThread):
     # 定义信号，用于发送输出和错误信息
     outputsignal = pyqtSignal(str)
-    errorsignal = pyqtSignal(str,str)
+    errorsignal = pyqtSignal(str, str)
     clone_completed = pyqtSignal(str, str, list)  # 新增信号，用于通知克隆完成
 
     def __init__(self, install_args, user_path, project_name, operation):
@@ -28,6 +28,8 @@ class GitCloneThread(QThread):
 
     def run(self):
         try:
+            os.system("rmdir /s /q "f"{self.clonedir}")
+            os.makedirs(self.clonedir, exist_ok=True)
             print("开始克隆仓库...")
             self.outputsignal.emit("开始克隆仓库...")
 
@@ -55,9 +57,14 @@ class GitCloneThread(QThread):
             self.clone_completed.emit(self.clonedir, self.project_name, self.install_args)  # 发送克隆完成信号
 
         except subprocess.CalledProcessError as e:
+            print(f"克隆失败: {e}")
             self.errorsignal.emit(e.output, self.clonedir)  # 发射错误信息
+        except Exception as e:
+            print(f"运行失败: {e}")
+            self.errorsignal.emit(str(e), self.clonedir)  # 发射错误信息
         finally:
             # 退出线程
+            self.wait()  # 等待线程结束
             self.quit()
 
 class BatExecutionThread(QThread):
@@ -74,18 +81,13 @@ class BatExecutionThread(QThread):
 
     def run(self):
         try:
-
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            startupinfo.wShowWindow = subprocess.SW_HIDE
-
             print("开始运行bat...")
             self.outputsignal.emit("开始运行...")
             runner_path = os.path.join(self.running_path, "runner.exe")
             print(runner_path)
             if self.operation=="install":
                 # 使用subprocess.Popen来实时获取输出
-                result = subprocess.run([runner_path,'--install'], check=True, capture_output=True, text=True,strartupinfo=startupinfo)
+                result = subprocess.run([runner_path,'--install'], check=True, capture_output=True, text=True)
                 if result.returncode == 0:
                     self.outputsignal.emit(f"安装完成，目录: {self.running_path}")
                     print("运行完成")
@@ -94,7 +96,7 @@ class BatExecutionThread(QThread):
 
             elif self.operation=="launch":
                 SiGlobal.siui.ThreadList["running"].append(self.project_name)
-                result = subprocess.run([runner_path,'--launch'], check=True, capture_output=True, text=True,strartupinfo=startupinfo)
+                result = subprocess.run([runner_path,'--launch'], check=True, capture_output=True, text=True)
                 self.outputsignal.emit("启动完成")
                 self.outputsignal.emit(f"{self.project_name}运行退出")
                 SiGlobal.siui.ThreadList["running"].remove(self.project_name)

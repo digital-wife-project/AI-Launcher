@@ -18,6 +18,10 @@
    "value": false
   },
   {
+   "optionDest": "icon_file",
+   "value": "C:/Users/wyy19/Downloads/\u6e05\u8a00AI\u753b\u56fe_0501.ico"
+  },
+  {
    "optionDest": "clean_build",
    "value": true
   },
