@@ -123,6 +123,7 @@ class Row_for_each_project(SiDenseHContainer):
     def OpeniunzipFinished(self,project_name,save_path,_):
         self.demo_progress_button_text.setText("解压完成")
         abs_path = os.path.abspath(save_path)
+        shutil.copy("./runner.exe",abs_path)
         print(f"Download finished for file: {abs_path}")
         self.demo_push_button_text.disconnect(self.model_windows_connection)
         self.demo_push_button_text.setEnabled(True)
