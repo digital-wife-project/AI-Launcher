@@ -1,4 +1,4 @@
-﻿from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets
 import icons
 from components.page_about import About
 from components.page_tools import tools
@@ -36,7 +36,7 @@ class MySiliconApp(SiliconApplication):
         self.move((screen_geo.width() - self.width()) // 2, (screen_geo.height() - self.height()) // 2)
         self.layerMain().setTitle("AL All In One AI Launcher")
         self.setWindowTitle("AL Launcher")
-        self.setWindowIcon(QIcon("./img/empty_icon.png"))
+        self.setWindowIcon(QIcon("./img/logo_new.png"))
 
         self.layerMain().addPage(ExampleHomepage(self),
                                  icon=SiGlobal.siui.iconpack.get("ic_fluent_home_filled"),
