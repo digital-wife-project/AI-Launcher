@@ -6,10 +6,10 @@
     "configurations": [
 
         {
-            "name": "Python 调试程序: start.py",
+            "name": "Python 调试程序: sAL.py",
             "type": "debugpy",
             "request": "launch",
-            "program": "D://AI-Launcher//start.py",
+            "program": "D://AI-Launcher//AL.py",
             "console": "integratedTerminal"
         }
     ]

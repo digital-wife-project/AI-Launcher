@@ -1,4 +1,5 @@
-﻿import sys
+﻿import shutil
+import sys
 import os
 from PyQt5.QtCore import QThread, pyqtSignal
 import subprocess
@@ -28,7 +29,7 @@ class GitCloneThread(QThread):
 
     def run(self):
         try:
-            os.system("rmdir /s /q "f"{self.clonedir}")
+            shutil.rmtree(self.clonedir, ignore_errors=True)  # 删除旧目录         
             os.makedirs(self.clonedir, exist_ok=True)
             print("开始克隆仓库...")
             self.outputsignal.emit("开始克隆仓库...")
@@ -64,8 +65,8 @@ class GitCloneThread(QThread):
             self.errorsignal.emit(str(e), self.clonedir)  # 发射错误信息
         finally:
             # 退出线程
-            self.wait()  # 等待线程结束
             self.quit()
+
 
 class BatExecutionThread(QThread):
     # 定义信号，用于发送输出信息
