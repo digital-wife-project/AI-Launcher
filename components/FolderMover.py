@@ -49,10 +49,41 @@ class DeleteFolderThread(QThread):
         self.folder_path = folder_path
 
     def run(self):
-        result = subprocess.run(["powershell", "-Command", "Remove-Item", "-Recurse", "-Force", '-Path','D:\\test2'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if result.returncode == 0:
-            self.outputsignal.emit("目录清理成功...")
-        else:
-            print("目录清理失败")
+        delete_folder_silently(self.folder_path)
         self.finished_signal.emit()
         self.quit()  # 确保发射完成信号
+
+def delete_folder_silently(folder_path):
+    """
+    静默删除指定文件夹（支持非空目录）
+    参数：
+        folder_path (str): 要删除的文件夹路径
+    返回：
+        bool: 删除是否成功
+    """
+    try:
+        if os.name == 'nt':
+            # Windows系统使用rmdir命令
+            subprocess.run(
+                f'rmdir /s /q "{folder_path}"',
+                shell=True,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        else:
+            # Linux/macOS使用rm命令
+            subprocess.run(
+                f'rm -rf "{folder_path}"',
+                shell=True,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"删除失败: {e}")
+        return False
+    except FileNotFoundError:
+        print(f"路径不存在: {folder_path}")
+        return False

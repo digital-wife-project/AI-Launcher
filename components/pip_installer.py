@@ -1,11 +1,9 @@
-﻿import shutil
-import sys
-import os
+﻿import os
 from PyQt5.QtCore import QThread, pyqtSignal
 import subprocess
 
 from siui.core import SiGlobal
-from .FolderMover import DeleteFolderThread
+from .FolderMover import delete_folder_silently
 import subprocess
 import os
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -29,11 +27,7 @@ class GitCloneThread(QThread):
 
     def run(self):
         try:
-            result = subprocess.run(["powershell", "-Command", "Remove-Item", "-Recurse", "-Force", '-Path','D:\\test2'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if result.returncode == 0:
-                self.outputsignal.emit("目录清理成功...")
-            else:
-                print("目录清理失败")
+            delete_folder_silently(self.clonedir)
             os.makedirs(self.clonedir, exist_ok=True)
             print("开始克隆仓库...")
             self.outputsignal.emit("开始克隆仓库...")
