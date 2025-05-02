@@ -29,7 +29,11 @@ class GitCloneThread(QThread):
 
     def run(self):
         try:
-            shutil.rmtree(self.clonedir, ignore_errors=True)  # 删除旧目录         
+            result = subprocess.run(["powershell", "-Command", "Remove-Item", "-Recurse", "-Force", '-Path','D:\\test2'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode == 0:
+                self.outputsignal.emit("目录清理成功...")
+            else:
+                print("目录清理失败")
             os.makedirs(self.clonedir, exist_ok=True)
             print("开始克隆仓库...")
             self.outputsignal.emit("开始克隆仓库...")
@@ -53,16 +57,9 @@ class GitCloneThread(QThread):
             proc.wait()
             # 检查是否有错误发生
             if proc.returncode != 0:
-                raise subprocess.CalledProcessError(proc.returncode, proc.args, output=proc.stdout.read())
+                self.errorsignal.emit("克隆失败", self.clonedir)  # 发射错误信息
             self.outputsignal.emit(f"克隆完成，目录: {self.clonedir}")
             self.clone_completed.emit(self.clonedir, self.project_name, self.install_args)  # 发送克隆完成信号
-
-        except subprocess.CalledProcessError as e:
-            print(f"克隆失败: {e}")
-            self.errorsignal.emit(e.output, self.clonedir)  # 发射错误信息
-        except Exception as e:
-            print(f"运行失败: {e}")
-            self.errorsignal.emit(str(e), self.clonedir)  # 发射错误信息
         finally:
             # 退出线程
             self.quit()

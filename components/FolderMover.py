@@ -1,5 +1,6 @@
 ﻿import os
 import shutil
+import subprocess
 from PyQt5.QtCore import QThread, pyqtSignal
 
 class FolderMover(QThread):
@@ -48,6 +49,10 @@ class DeleteFolderThread(QThread):
         self.folder_path = folder_path
 
     def run(self):
-        os.system("rmdir /s /q "f"{self.folder_path}")
+        result = subprocess.run(["powershell", "-Command", "Remove-Item", "-Recurse", "-Force", '-Path','D:\\test2'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode == 0:
+            self.outputsignal.emit("目录清理成功...")
+        else:
+            print("目录清理失败")
         self.finished_signal.emit()
         self.quit()  # 确保发射完成信号
